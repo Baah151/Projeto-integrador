@@ -1,0 +1,235 @@
+/* CONFIGURAÇÕES GERAIS */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #ECFDF5;
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 290px;
+    background: linear-gradient(180deg, #046C4E, #10B981);
+    padding: 35px 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.logo img {
+    width: 100%;
+    max-width: 170px;
+    border-radius: 18px;
+    background-color: white;
+    padding: 8px;
+    margin: 0 auto 40px auto;
+    display: block;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* LINKS COM FLEX PARA ÍCONES */
+.sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 14px;
+    transition: 0.3s;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.sidebar nav a:hover, .sidebar nav a.active {
+    background-color: rgba(255,255,255,0.18);
+    transform: translateX(6px);
+}
+
+/* CONFIGURAÇÃO DOS ÍCONES */
+.material-symbols-outlined {
+    font-size: 22px;
+}
+
+/* LOGOUT COM DISTANCIAMENTO */
+.logout {
+    margin-top: 30px;
+}
+
+.logout a {
+    display: block;
+    text-decoration: none;
+    text-align: center;
+    background-color: rgba(255,255,255,0.12);
+    color: white;
+    padding: 12px;
+    border-radius: 14px;
+    font-weight: 600;
+    transition: 0.3s;
+    font-size: 0.9rem;
+}
+
+.logout a:hover {
+    background-color: rgba(255,255,255,0.25);
+}
+
+/* MAIN CONTENT */
+.main-content {
+    flex: 1;
+    padding: 40px;
+}
+
+.topbar h1 {
+    color: #065F46;
+    font-size: 2.2rem;
+}
+
+.topbar p {
+    color: #4B5563;
+    margin-bottom: 30px;
+    font-size: 0.95rem;
+}
+
+/* GRID DE CONFIGURAÇÃO */
+.setup-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 25px;
+}
+
+.config-card, .summary-card {
+    background: white;
+    padding: 30px;
+    border-radius: 24px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    font-weight: 600;
+    color: #046C4E;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+}
+
+input[type="date"], 
+.type-select, 
+#time-input { 
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #E5E7EB;
+    border-radius: 12px;
+    outline: none;
+    font-size: 0.9rem;
+    background: #FAFCF8;
+    color: #374151;
+}
+
+/* ADICIONAR HORÁRIO */
+.add-time-row {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-add {
+    background: #10B981;
+    color: white;
+    border: none;
+    padding: 0 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-add:hover {
+    background: #059669;
+}
+
+/* CHIPS DE HORÁRIO */
+.temp-time-list {
+    margin-top: 15px;
+    background: #F9FAFB;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid #F3F4F6;
+}
+
+.label-mini {
+    font-size: 0.75rem;
+    color: #6B7280;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* BOTÃO SALVAR */
+.btn-save-agenda {
+    width: 100%;
+    padding: 15px;
+    background: #046C4E;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: 0.3s;
+}
+
+.btn-save-agenda:hover {
+    background: #03543d;
+}
+
+/* SUMMARY CARD */
+.summary-card h2 {
+    color: #065F46;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.small {
+    font-size: 0.8rem;
+    color: #9CA3AF;
+    margin-bottom: 20px;
+}
+
+.empty-list {
+    text-align: center;
+    padding: 50px 20px;
+    border: 2px dashed #F3F4F6;
+    border-radius: 15px;
+    color: #9CA3AF;
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 1100px) {
+    .setup-grid {
+        grid-template-columns: 1fr;
+    }
+}

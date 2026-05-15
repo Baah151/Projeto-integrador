@@ -1,0 +1,179 @@
+/* CONFIGURAÇÕES GERAIS */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #ECFDF5;
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* SIDEBAR PADRONIZADA */
+.sidebar {
+    width: 290px;
+    background: linear-gradient(180deg, #046C4E, #10B981);
+    padding: 35px 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.logo img {
+    width: 100%;
+    max-width: 170px;
+    border-radius: 18px;
+    background-color: white;
+    padding: 8px;
+    margin: 0 auto 40px auto;
+    display: block;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 14px;
+    transition: 0.3s;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.sidebar nav a:hover, .sidebar nav a.active {
+    background-color: rgba(255,255,255,0.18);
+    transform: translateX(6px);
+}
+
+/* ÍCONES */
+.material-symbols-outlined {
+    font-size: 22px;
+}
+
+/* LOGOUT COM DISTANCIAMENTO */
+.logout {
+    margin-top: 30px;
+}
+
+.logout a {
+    display: block;
+    text-decoration: none;
+    text-align: center;
+    background-color: rgba(255,255,255,0.12);
+    color: white;
+    padding: 12px;
+    border-radius: 14px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.logout a:hover {
+    background-color: rgba(255,255,255,0.25);
+}
+
+/* MAIN CONTENT */
+.main-content {
+    flex: 1;
+    padding: 40px;
+}
+
+.topbar h1 { color: #065F46; font-size: 2.2rem; }
+.topbar p { color: #4B5563; margin-bottom: 30px; font-size: 0.95rem; }
+
+/* FILTROS */
+.filter-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+#report-month {
+    padding: 10px 15px;
+    border: 2px solid #D1FAE5;
+    border-radius: 12px;
+    color: #065F46;
+    font-weight: 600;
+    outline: none;
+}
+
+.btn-export {
+    background-color: white;
+    color: #046C4E;
+    border: 2px solid #046C4E;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* MÉTRICAS */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.metric-card {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+}
+
+.metric-card p { color: #065F46; font-size: 2.4rem; font-weight: 700; }
+.trend { font-size: 0.75rem; color: #10B981; font-weight: 500; }
+
+/* CHARTS */
+.charts-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.chart-box {
+    background: white;
+    padding: 30px;
+    border-radius: 24px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+}
+
+.chart-box h3 { color: #065F46; font-size: 1.1rem; margin-bottom: 30px; text-align: left; }
+
+.chart-placeholder {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 40px;
+    height: 150px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #F3F4F6;
+}
+
+.bar-container { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.bar { width: 60px; border-radius: 8px 8px 0 0; }
+.fisio { background-color: #FCA5A5; }
+.pilates { background-color: #93C5FD; }
+
+.empty-msg, .empty-chart { color: #9CA3AF; font-size: 0.85rem; font-style: italic; padding: 20px 0; }
+
+@media (max-width: 1100px) {
+    .charts-container { grid-template-columns: 1fr; }
+    .metrics-grid { grid-template-columns: 1fr; }
+}
