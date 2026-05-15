@@ -1,0 +1,254 @@
+/* ============================================================
+   CONFIGURAÇÕES GERAIS
+   ============================================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #EEF3EA;
+    min-height: 100vh;
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* ============================================================
+   SIDEBAR (PADRONIZADA)
+   ============================================================ */
+.sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: linear-gradient(180deg, #4F6F52, #739072);
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.logo img {
+    width: 100%;
+    max-width: 160px;
+    border-radius: 15px;
+    background: white;
+    padding: 8px;
+    margin: 0 auto 30px auto;
+    display: block;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: white;
+    text-decoration: none;
+    padding: 12px 15px;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease-in-out; 
+}
+
+.sidebar nav a:hover, .sidebar nav a.active {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(8px);
+}
+
+.material-symbols-outlined {
+    font-size: 22px;
+}
+
+.logout {
+    margin-top: 30px;
+}
+
+.logout a {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 12px;
+    border-radius: 14px;
+    font-weight: 600;
+}
+
+/* ============================================================
+   CONTEÚDO PRINCIPAL
+   ============================================================ */
+.main-content {
+    flex-grow: 1;
+    padding: 30px 50px;
+}
+
+.topbar h1 {
+    color: #3F5B41;
+    font-size: 1.8rem;
+    margin-bottom: 5px;
+}
+
+.topbar p {
+    color: #6D7D6A;
+    margin-bottom: 25px;
+    font-size: 0.9rem;
+}
+
+/* CARD DE PERFIL - REDUZIDO PARA 700PX */
+.profile-card {
+    background: white;
+    border-radius: 25px;
+    padding: 25px 35px;
+    max-width: 700px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+/* ============================================================
+   HEADER DO PERFIL
+   ============================================================ */
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.avatar-container {
+    position: relative;
+    width: 110px; 
+    height: 110px;
+    flex-shrink: 0;
+}
+
+#profile-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 18px;
+    border: 3px solid #739072;
+    background-color: #f8f8f8;
+    display: block;
+}
+
+.upload-badge {
+    position: absolute;
+    bottom: -5px;
+    right: -5px;
+    background: #4F6F52;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    border: 3px solid white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.header-text h3 {
+    color: #333;
+    font-size: 1.2rem;
+}
+
+.header-text p {
+    color: #888;
+    font-size: 0.85rem;
+}
+
+/* ============================================================
+   FORMULÁRIO - AJUSTADO PARA FICAR RETO
+   ============================================================ */
+.form-section {
+    margin-bottom: 20px;
+}
+
+.form-section h4 {
+    color: #739072;
+    font-size: 0.95rem;
+    margin-bottom: 12px;
+    border-left: 4px solid #739072;
+    padding-left: 10px;
+}
+
+.input-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 12px;
+}
+
+.input-group {
+    flex: 1; /* Isso faz os campos dividirem o espaço igualmente */
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group label {
+    font-weight: 600;
+    color: #4F6F52;
+    margin-bottom: 4px;
+    font-size: 0.8rem;
+}
+
+.input-group input {
+    width: 100%; /* Ocupa todo o espaço do flex: 1 */
+    padding: 10px 14px;
+    border: 2px solid #D8E3D2;
+    border-radius: 10px;
+    outline: none;
+    background: #FAFCF8;
+    font-size: 0.85rem;
+    color: #333;
+}
+
+.disabled-input {
+    background-color: #f1f5ee !important;
+    color: #8c968b !important;
+}
+
+.form-actions {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.btn-save {
+    padding: 11px 40px;
+    background: #4F6F52;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-save:hover {
+    background: #3F5B41;
+}
+
+/* ============================================================
+   RESPONSIVIDADE
+   ============================================================ */
+@media (max-width: 950px) {
+    .container { flex-direction: column; }
+    .sidebar { width: 100%; flex-direction: row; padding: 15px; }
+    .main-content { padding: 20px; }
+    .input-row { flex-direction: column; gap: 10px; }
+}

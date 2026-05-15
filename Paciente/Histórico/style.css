@@ -1,0 +1,126 @@
+/* CONFIGURAÇÕES GERAIS */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #EEF3EA;
+    min-height: 100vh;
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* SIDEBAR */
+.sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: linear-gradient(180deg, #4F6F52, #739072);
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.logo img {
+    width: 100%;
+    max-width: 180px;
+    border-radius: 15px;
+    background: white;
+    padding: 10px;
+    margin: 0 auto 40px auto;
+    display: block;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: white;
+    text-decoration: none;
+    padding: 15px;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: all 0.3s ease-in-out; 
+}
+
+.sidebar nav a:hover, .sidebar nav a.active {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(8px);
+}
+
+/* ÍCONES */
+.material-symbols-outlined {
+    font-size: 22px;
+}
+
+/* LOGOUT COM ESPAÇAMENTO */
+.logout {
+    margin-top: 30px;
+}
+
+.logout a {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 12px;
+    border-radius: 14px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.logout a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* CONTEÚDO PRINCIPAL */
+.main-content {
+    flex-grow: 1;
+    padding: 50px;
+}
+
+.topbar h1 {
+    color: #3F5B41;
+    font-size: 2.2rem;
+    margin-bottom: 10px;
+}
+
+.topbar p {
+    color: #6D7D6A;
+    margin-bottom: 40px;
+}
+
+/* ESTADO VAZIO */
+.empty-history {
+    text-align: center;
+    padding: 60px 40px;
+    background: white;
+    border-radius: 30px;
+    max-width: 600px;
+    margin: 0 auto;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.empty-history h2 { color: #3F5B41; margin-bottom: 10px; }
+.empty-history p { color: #888; }
+
+@media (max-width: 950px) {
+    .container { flex-direction: column; }
+    .sidebar { width: 100%; flex-direction: row; padding: 20px; }
+    .sidebar nav { flex-direction: row; gap: 5px; }
+}

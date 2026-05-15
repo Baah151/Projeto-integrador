@@ -1,0 +1,148 @@
+/* CONFIGURAÇÕES GERAIS */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #EEF3EA;
+    min-height: 100vh;
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* SIDEBAR PADRONIZADA */
+.sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: linear-gradient(180deg, #4F6F52, #739072);
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.logo img {
+    width: 100%;
+    max-width: 160px;
+    border-radius: 15px;
+    background: white;
+    padding: 8px;
+    margin: 0 auto 30px auto;
+    display: block;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: white;
+    text-decoration: none;
+    padding: 12px 15px;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.sidebar nav a:hover, .sidebar nav a.active {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(8px);
+}
+
+.material-symbols-outlined { font-size: 22px; }
+
+.logout a {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: white;
+    background-color: rgba(255, 255, 255, 0.1);
+    padding: 12px;
+    border-radius: 14px;
+    font-weight: 600;
+}
+
+/* CONTEÚDO PRINCIPAL */
+.main-content {
+    flex-grow: 1;
+    padding: 30px 50px;
+}
+
+.topbar h1 { color: #3F5B41; font-size: 1.8rem; margin-bottom: 5px; }
+.topbar p { color: #6D7D6A; margin-bottom: 35px; font-size: 0.9rem; }
+
+/* CARDS DE RESUMO */
+.finance-summary {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.summary-card {
+    background: white;
+    padding: 20px 25px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+    max-width: 300px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.02);
+}
+
+.summary-card span {
+    font-size: 2.2rem;
+    color: #739072;
+    opacity: 0.7;
+}
+
+.summary-card p { color: #888; font-size: 0.8rem; }
+.summary-card h3 { color: #333; font-size: 1.3rem; }
+
+/* ESTADO VAZIO */
+.table-container {
+    background: white;
+    border-radius: 25px;
+    padding: 60px 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    max-width: 900px;
+    text-align: center;
+}
+
+.empty-finance {
+    color: #9CA3AF;
+}
+
+.empty-finance .material-symbols-outlined {
+    font-size: 4rem;
+    margin-bottom: 15px;
+    opacity: 0.3;
+}
+
+.empty-finance p {
+    color: #3F5B41;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.empty-finance span {
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .finance-summary { flex-direction: column; }
+}
