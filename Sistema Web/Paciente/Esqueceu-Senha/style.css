@@ -1,0 +1,141 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body{
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Usando o mesmo gradiente do Login para manter a unidade */
+    background: linear-gradient(135deg, #7D8D6B, #A3B18A);
+    padding: 20px;
+}
+
+.container{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card{
+    width: 100%;
+    max-width: 450px;
+    background-color: white;
+    padding: 50px 40px;
+    border-radius: 28px;
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+
+.logo{
+    width: 160px;
+    margin: 0 auto 40px auto; /* Aumentei um pouco o espaço inferior */
+}
+
+.logo img{
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    border-radius: 20px;
+    background-color: white;
+    padding: 10px;
+    
+    /* A MUDANÇA ESTÁ AQUI: Sombra verde mais forte */
+    box-shadow: 0 10px 30px rgba(79, 107, 69, 0.4); 
+}
+
+.card h1{
+    color: #66755A;
+    font-size: 1.8rem;
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+.card p{
+    color: #6B7462;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.recovery-form{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.input-group{
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group label{
+    margin-bottom: 8px;
+    color: #66755A;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.input-group input{
+    width: 100%;
+    padding: 14px;
+    border: 2px solid #D8DDCF;
+    border-radius: 12px;
+    outline: none;
+    background-color: #FAFAF7;
+    font-size: 0.95rem;
+    transition: 0.3s;
+}
+
+.input-group input:focus{
+    border-color: #7D8D6B;
+    background-color: white;
+    box-shadow: 0 0 0 4px rgba(125, 141, 107, 0.1);
+}
+
+button{
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background-color: #7D8D6B;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+}
+
+button:hover{
+    background-color: #66755A;
+    transform: translateY(-2px);
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 25px;
+    text-decoration: none;
+    color: #7D8D6B;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.back-link:hover {
+    color: #4F5A46;
+    text-decoration: underline;
+}
+
+/* Responsividade para telas muito pequenas */
+@media (max-width: 480px) {
+    .card {
+        padding: 40px 25px;
+    }
+}

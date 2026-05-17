@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prontuário do Paciente | Luana Damazio</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+</head>
+<body>
+
+    <div class="detalhes-container">
+        <a href="../pacientes/index.html" class="btn-back">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Voltar para Pacientes
+        </a>
+
+        <header class="patient-header">
+            <div class="patient-profile">
+                <div class="avatar-container">
+                    <img src="../assets/default-avatar.png" alt="Foto do Paciente" class="patient-photo">
+                </div>
+                <div class="patient-headline">
+                    <h1>Dona Maria de Souza Silva</h1>
+                    <p>Idade: -- anos • Nasc: --/--/---- • CPF: ---.---.-----</p>
+                    <p class="contact-info">
+                        <span class="material-symbols-outlined">call</span> (--)------ ----- 
+                        <span class="material-symbols-outlined">mail</span> sem-email@sistema.com
+                    </p>
+                </div>
+            </div>
+            <div class="patient-stats">
+                <div class="stat-card">
+                    <span>Sessões Concluídas</span>
+                    <h3>0</h3>
+                </div>
+            </div>
+        </header>
+
+        <div class="clinical-alert empty-alert">
+            <span class="material-symbols-outlined">assignment_late</span>
+            <div>
+                <strong>Nenhuma observação clínica restritiva:</strong> Adicione alertas de saúde ou restrições de movimentos editando o prontuário deste paciente no painel principal.
+            </div>
+        </div>
+
+        <div class="timeline-header-row">
+            <h2 class="section-title">Histórico de Atendimentos Concluídos</h2>
+            <div class="filter-group">
+                <span class="material-symbols-outlined">filter_alt</span>
+                <input type="month" value="2026-05">
+            </div>
+        </div>
+        
+        <section class="sessions-timeline">
+            
+            <div class="empty-timeline-state">
+                <span class="material-symbols-outlined">receipt_long</span>
+                <h3>Nenhum histórico de atendimento encontrado</h3>
+                <p>As notas clínicas, evoluções e documentos aparecerão listados aqui automaticamente assim que você concluir e finalizar o primeiro agendamento deste paciente na tela de sessões.</p>
+            </div>
+
+        </section>
+    </div>
+
+</body>
+</html>

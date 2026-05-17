@@ -1,0 +1,169 @@
+/* ============================================================
+   CONFIGURAÇÕES GERAIS DA TELA DE CADASTRO ISOLADA
+   ============================================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #ECFDF5;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.cadastro-container {
+    width: 100%;
+    max-width: 750px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* BOTÃO VOLTAR */
+.btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #046C4E;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 25px;
+    align-self: flex-start;
+    transition: 0.2s ease-in-out;
+}
+
+.btn-back:hover {
+    color: #03543d;
+    transform: translateX(-4px);
+}
+
+.topbar {
+    margin-bottom: 30px;
+}
+
+.topbar h1 {
+    color: #065F46;
+    font-size: 2.2rem;
+    margin-bottom: 5px;
+}
+
+.topbar p {
+    color: #4B5563;
+    font-size: 0.95rem;
+}
+
+/* CARD DO FORMULÁRIO */
+.form-card {
+    background-color: white;
+    border-radius: 24px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(4, 108, 78, 0.06);
+}
+
+.form-section {
+    margin-bottom: 30px;
+}
+
+.form-section h4 {
+    color: #046C4E;
+    font-size: 1.05rem;
+    margin-bottom: 18px;
+    border-left: 4px solid #10B981;
+    padding-left: 10px;
+}
+
+/* LINHA DE INPUTS */
+.input-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 18px;
+    width: 100%;
+}
+
+.input-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group label {
+    font-weight: 600;
+    color: #046C4E;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+}
+
+/* TODOS OS INPUTS PADRONIZADOS */
+.input-group input {
+    padding: 12px 15px;
+    border: 2px solid #D1FAE5;
+    border-radius: 12px;
+    outline: none;
+    background-color: #F9FBF9;
+    font-size: 0.9rem;
+    color: #333;
+    transition: 0.3s;
+    width: 100%;
+}
+
+.input-group input:focus {
+    border-color: #10B981;
+    background-color: white;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+/* AÇÕES DO FORMULÁRIO */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 10px;
+    border-top: 1px solid #F3F4F6;
+    padding-top: 25px;
+}
+
+.btn-submit-cadastro {
+    background-color: #046C4E;
+    color: white;
+    border: none;
+    padding: 13px 40px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: 0.3s;
+}
+
+.btn-submit-cadastro:hover {
+    background-color: #03543d;
+    transform: translateY(-1px);
+}
+
+.btn-cancel-cadastro {
+    background-color: #F3F4F6;
+    color: #4B5563;
+    text-decoration: none;
+    padding: 13px 30px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-align: center;
+    transition: 0.3s;
+}
+
+.btn-cancel-cadastro:hover {
+    background-color: #E5E7EB;
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 600px) {
+    body { padding: 20px 15px; }
+    .form-card { padding: 25px; }
+    .input-row { flex-direction: column; gap: 18px; }
+}
