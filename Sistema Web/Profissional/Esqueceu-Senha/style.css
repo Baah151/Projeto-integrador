@@ -1,0 +1,136 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    min-height: 100vh;
+}
+
+.recovery-wrapper {
+    background: linear-gradient(180deg, #046C4E, #10B981);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.recovery-card {
+    background: #ffffff;
+    padding: 50px 45px;
+    border-radius: 32px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    width: 100%;
+    max-width: 480px;
+}
+
+.recovery-header {
+    margin-bottom: 30px;
+}
+
+.logo-wrapper {
+    display: inline-block;
+    border-radius: 20px;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.8));
+}
+
+.recovery-logo {
+    width: 110px;
+    height: auto;
+    border-radius: 18px;
+    background: white;
+    padding: 5px;
+    display: block;
+}
+
+.recovery-header h1 {
+    color: #065F46;
+    font-size: 1.65rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.recovery-header p {
+    color: #4B5563;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+
+.input-group {
+    text-align: left;
+    margin-bottom: 25px;
+}
+
+.input-group label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #046C4E;
+    margin-bottom: 6px;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px 16px;
+    border: 2px solid #E5E7EB;
+    border-radius: 12px;
+    outline: none;
+    font-size: 0.92rem;
+    transition: 0.3s;
+    background-color: #F9FAFB;
+    color: #1F2937;
+}
+
+.input-group input:focus {
+    border-color: #10B981;
+    background-color: white;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
+}
+
+.btn-recovery {
+    display: block;
+    width: 100%;
+    background-color: #046C4E;
+    color: white;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(4, 108, 78, 0.2);
+}
+
+.btn-recovery:hover {
+    background-color: #03543d;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(4, 108, 78, 0.3);
+}
+
+.recovery-footer a {
+    color: #046C4E;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: 0.2s;
+}
+
+.recovery-footer a:hover {
+    color: #10B981;
+}
+
+@media (max-width: 480px) {
+    .recovery-card {
+        padding: 35px 20px;
+    }
+    .recovery-header h1 {
+        font-size: 1.45rem;
+    }
+}
