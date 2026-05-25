@@ -1,0 +1,137 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0b3a22 0%, #00BF63 100%);
+    padding: 20px;
+}
+
+.container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card {
+    width: 100%;
+    max-width: 400px;
+    background-color: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    padding: 40px 35px;
+    border-radius: 24px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.logo {
+    width: 150px;
+    margin: 0 auto 25px auto;
+}
+
+.logo img {
+    width: 100%;
+    height: auto;
+    object-fit: contain;
+    border-radius: 18px;
+    background-color: white;
+    padding: 10px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2); 
+}
+
+.card h1 {
+    color: #00BF63;
+    font-size: 1.8rem;
+    margin-bottom: 12px;
+    font-weight: 700;
+}
+
+.card p {
+    color: #4B5563;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 25px;
+}
+
+.recovery-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.input-group {
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-group label {
+    margin-bottom: 8px;
+    color: #374151;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px;
+    border: 2px solid #E5E7EB;
+    border-radius: 12px;
+    outline: none;
+    background-color: #FAFCF9;
+    font-size: 0.95rem;
+    color: #1F2937;
+    transition: 0.2s;
+}
+
+.input-group input:focus {
+    border-color: #00BF63;
+    background-color: white;
+}
+
+button {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background-color: #00BF63;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-top: 5px;
+}
+
+button:hover {
+    background-color: #009e51;
+    transform: translateY(-2px);
+}
+
+.back-link {
+    display: inline-block;
+    margin-top: 25px;
+    text-decoration: none;
+    color: #00BF63;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.back-link:hover {
+    color: #009e51;
+}
+
+@media (max-width: 480px) {
+    .card {
+        padding: 35px 20px;
+    }
+}
