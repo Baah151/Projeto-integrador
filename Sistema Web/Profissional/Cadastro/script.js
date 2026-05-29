@@ -112,3 +112,58 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = "../pacientes/index.html";
     });
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    const formProfissional = document.getElementById('form-cadastro-profissional'); // ID do form do HTML
+
+    if (!formProfissional) return;
+
+    formProfissional.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const senha = document.getElementById('reg-senha').value;
+        const confirmaSenha = document.getElementById('reg-confirma-senha').value;
+
+        if (senha !== confirmaSenha) {
+            alert("Erro: As senhas não coincidem.");
+            return;
+        }
+
+        // Monta o objeto com os dados digitados na tela do profissional
+        const dadosProfissional = {
+            nome: document.getElementById('reg-nome').value,
+            cpf: document.getElementById('reg-cpf').value.replace(/\D/g, ""),
+            nascimento: document.getElementById('reg-nascimento').value,
+            email: document.getElementById('reg-email').value,
+            telefone: document.getElementById('reg-telefone').value.replace(/\D/g, ""),
+            senha: senha,
+            cidade: document.getElementById('end-cidade').value,
+            estado: document.getElementById('end-estado').value.toUpperCase()
+        };
+
+        try {
+            // Envia para a rota de profissionais do backend
+            const resposta = await fetch('http://localhost:3000/profissionais', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dadosProfissional)
+            });
+
+            const resultado = await resposta.json();
+
+            if (resposta.ok) {
+                alert("Profissional cadastrado com sucesso!");
+                formProfissional.reset();
+                // Redireciona para a tela de Login que está na pasta ao lado
+                window.location.href = "../Login/index.html"; 
+            } else {
+                alert(`Erro: ${resultado.error}`);
+            }
+        } catch (error) {
+            console.error(error);
+            alert("Não foi possível conectar ao servidor.");
+        }
+    });
+});
