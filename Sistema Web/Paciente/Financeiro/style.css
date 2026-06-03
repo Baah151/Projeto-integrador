@@ -1,0 +1,425 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #f2f9f5;
+    min-height: 100vh;
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.mobile-header {
+    display: none;
+}
+
+.close-menu-btn {
+    display: none;
+}
+
+.menu-overlay-backdrop {
+    display: none;
+}
+
+.sidebar {
+    width: 280px;
+    min-width: 280px;
+    background: linear-gradient(135deg, #0b3a22 0%, #00BF63 100%);
+    padding: 30px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.logo img {
+    width: 100%;
+    max-width: 160px;
+    border-radius: 15px;
+    background: white;
+    padding: 8px;
+    margin: 0 auto 30px auto;
+    display: block;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: white;
+    text-decoration: none;
+    padding: 12px 15px;
+    border-radius: 12px;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.sidebar nav a:hover, .sidebar nav a.active {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateX(5px);
+}
+
+.material-symbols-outlined { 
+    font-size: 22px; 
+}
+
+.logout { 
+    margin-top: 30px; 
+}
+
+.logout a {
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: white;
+    background-color: #00BF63;
+    padding: 12px;
+    border-radius: 14px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.logout a:hover {
+    background-color: #009e51;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 30px 50px;
+}
+
+.topbar h1 { 
+    color: #0b3a22; 
+    font-size: 1.8rem; 
+    margin-bottom: 5px; 
+}
+
+.topbar p { 
+    color: #4B5563; 
+    margin-bottom: 25px; 
+    font-size: 0.9rem; 
+}
+
+.finance-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 900px;
+    margin-bottom: 25px;
+    gap: 20px;
+}
+
+.summary-card {
+    background: white;
+    padding: 20px 25px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 280px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.02);
+}
+
+.summary-card span {
+    font-size: 2.2rem;
+    color: #00BF63;
+}
+
+.summary-card p { 
+    color: #6B7280; 
+    font-size: 0.85rem; 
+}
+
+.summary-card h3 { 
+    color: #0b3a22; 
+    font-size: 1.5rem; 
+    font-weight: 700;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+}
+
+input[type="month"] {
+    padding: 8px 16px;
+    border: 1px solid #a3e9c1;
+    border-radius: 14px;
+    background-color: #ffffff;
+    outline: none;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    font-size: 0.95rem;
+    color: #0b3a22;
+    cursor: pointer;
+    width: 220px;
+}
+
+.table-wrapper {
+    background: white;
+    border-radius: 25px;
+    padding: 10px 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    max-width: 900px;
+}
+
+.finance-header {
+    display: grid;
+    grid-template-columns: 1.2fr 1.5fr 1fr 1fr 0.5fr;
+    padding: 20px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    font-weight: 600;
+    color: #374151;
+    font-size: 0.95rem;
+}
+
+.finance-item {
+    display: grid;
+    grid-template-columns: 1.2fr 1.5fr 1fr 1fr 0.5fr;
+    padding: 20px 15px;
+    align-items: center;
+    border-bottom: 1px solid #f9f9f9;
+    color: #4B5563;
+    font-size: 0.9rem;
+}
+
+.finance-item:last-child {
+    border-bottom: none;
+}
+
+.status-pago {
+    color: #059669;
+    font-weight: 600;
+}
+
+.action-check {
+    color: #00BF63;
+    text-align: center;
+    font-weight: bold;
+}
+
+.empty-finance {
+    text-align: center;
+    padding: 50px 0;
+    color: #9CA3AF;
+}
+
+.empty-finance span {
+    font-size: 3.5rem;
+    opacity: 0.3;
+    margin-bottom: 10px;
+}
+
+.menu-badge {
+    background-color: #EA580C;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    min-width: 20px;
+    height: 20px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .mobile-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: linear-gradient(135deg, #0b3a22 0%, #00BF63 100%);
+        padding: 12px 15px;
+        position: sticky;
+        top: 0;
+        z-index: 90;
+        width: 100%;
+        height: 60px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .menu-toggle-btn {
+        background: transparent;
+        border: none;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mobile-page-title {
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .mobile-logo img {
+        height: 35px;
+        width: auto;
+        border-radius: 6px;
+        background: white;
+        padding: 2px;
+    }
+
+    .sidebar-top-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .sidebar .logo img {
+        margin: 0;
+        max-width: 120px;
+    }
+
+    .close-menu-btn {
+        display: flex;
+        background: transparent;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -280px;
+        width: 280px;
+        height: 100vh;
+        z-index: 200;
+        transition: left 0.3s ease-in-out;
+        box-shadow: 5px 0 15px rgba(0,0,0,0.2);
+        justify-content: flex-start;
+        gap: 20px;
+        padding: 30px 20px;
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    .sidebar nav {
+        width: 100%;
+    }
+
+    .logout {
+        margin-top: auto;
+        width: 100%;
+    }
+
+    .menu-overlay-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 190;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease-in-out;
+    }
+
+    .menu-overlay-backdrop.active {
+        display: block;
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .main-content { 
+        padding: 20px 15px; 
+        width: 100%;
+    }
+
+    .topbar h1 {
+        font-size: 1.4rem;
+    }
+
+    .topbar p {
+        font-size: 0.85rem;
+        margin-bottom: 15px;
+    }
+
+    .finance-controls { 
+        flex-direction: column; 
+        align-items: flex-start; 
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+
+    .summary-card { 
+        width: 100%; 
+        padding: 15px 20px;
+    }
+
+    .filter-group { 
+        width: 100%; 
+    }
+
+    input[type="month"] { 
+        width: 100%; 
+        text-align: center; 
+    }
+
+    .table-wrapper {
+        padding: 10px;
+        border-radius: 16px;
+    }
+
+    .finance-header { 
+        display: none; 
+    }
+
+    .finance-item { 
+        grid-template-columns: 1fr; 
+        gap: 6px;
+        padding: 15px 10px;
+    }
+
+    .finance-item span, .finance-item div {
+        display: flex;
+        align-items: center;
+    }
+
+    .finance-item span::before, .finance-item div::before {
+        font-weight: 700;
+        color: #374151;
+        width: 90px;
+        min-width: 90px;
+        display: inline-block;
+        font-size: 0.85rem;
+    }
+
+    .finance-item span:nth-child(1)::before { content: "Data:"; }
+    .finance-item span:nth-child(2)::before { content: "Serviço:"; }
+    .finance-item span:nth-child(3)::before { content: "Valor:"; }
+    .finance-item span:nth-child(4)::before { content: "Status:"; }
+    .finance-item .action-check::before { content: "Ação:"; }
+
+    .action-check { 
+        text-align: left; 
+    }
+}

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Paciente | Luana Damazio</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <div class="cadastro-container">
+
+        <div class="topbar">
+            <h1>Cadastrar Novo Paciente</h1>
+            <p>Registre manualmente os dados de pacientes com dificuldades de acesso tecnológico.</p>
+        </div>
+
+        <section class="form-card">
+            <form id="form-cadastro-manual">
+                
+                <div class="columns-grid">
+                    
+                    <div class="column-left">
+                        
+                        <div class="form-section">
+                            <h4>Registro</h4>
+                            <div class="input-row">
+                                <div class="input-group">
+                                    <label>Nome Completo*</label>
+                                    <input type="text" id="reg-nome" placeholder="Ex: Nome do Paciente" required>
+                                </div>
+                            </div>
+                            <div class="input-row">
+                                <div class="input-group">
+                                    <label>CPF*</label>
+                                    <input type="text" id="reg-cpf" placeholder="000.000.000-00" maxlength="14" required>
+                                </div>
+                                <div class="input-group">
+                                    <label>Data de Nascimento*</label>
+                                    <input type="date" id="reg-nascimento" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-section" style="margin-bottom: 0;">
+                            <h4>Contato</h4>
+                            <div class="input-row">
+                                <div class="input-group">
+                                    <label>E-mail*</label>
+                                    <input type="email" id="reg-email" placeholder="exemplo@email.com" required>
+                                </div>
+                                <div class="input-group">
+                                    <label>Telefone / WhatsApp*</label>
+                                    <input type="text" id="reg-telefone" placeholder="(00) 00000-0000" maxlength="15" required>
+                                </div>
+                            </div>
+                            <div class="input-row">
+                                <div class="input-group password-container">
+                                    <label>Criar Senha Inicial*</label>
+                                    <div class="password-wrapper">
+                                        <input type="password" id="reg-senha" placeholder="Digite uma senha" required>
+                                        <span class="material-symbols-outlined toggle-eye" id="eye-senha">visibility</span>
+                                    </div>
+                                </div>
+                                <div class="input-group password-container">
+                                    <label>Confirmar Senha*</label>
+                                    <div class="password-wrapper">
+                                        <input type="password" id="reg-confirma-senha" placeholder="Repita a senha" required>
+                                        <span class="material-symbols-outlined toggle-eye" id="eye-confirma">visibility</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="column-right">
+                        <div class="form-section" style="margin-bottom: 0; height: 100%;">
+                            <h4>Endereço</h4>
+                            <div class="input-row">
+                                <div class="input-group">
+                                    <label>CEP*</label>
+                                    <input type="text" id="end-cep" placeholder="00000-000" maxlength="9" required>
+                                </div>
+                            </div>
+                            <div class="input-row">
+                                <div class="input-group">
+                                    <label>Logradouro*</label>
+                                    <input type="text" id="end-logradouro" placeholder="Rua, Avenida, etc." required>
+                                </div>
+                            </div>
+                            <div class="input-row">
+                                <div class="input-group" style="flex: 0.4;">
+                                    <label>Número*</label>
+                                    <input type="text" id="end-numero" placeholder="Ex: 123" required>
+                                </div>
+                                <div class="input-group">
+                                    <label>Bairro*</label>
+                                    <input type="text" id="end-bairro" placeholder="Bairro" required>
+                                </div>
+                            </div>
+                            <div class="input-row">
+                                <div class="input-group">
+                                    <label>Complemento (Opcional)</label>
+                                    <input type="text" id="end-complemento" placeholder="Apto, Bloco, etc.">
+                                </div>
+                            </div>
+                            <div class="input-row">
+                                <div class="input-group" style="flex: 2;">
+                                    <label>Cidade*</label>
+                                    <input type="text" id="end-cidade" placeholder="Cidade" required>
+                                </div>
+                                <div class="input-group">
+                                    <label>Estado (UF)*</label>
+                                    <input type="text" id="end-estado" placeholder="Ex: SC" maxlength="2" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="form-actions">
+                    <a href="../pacientes/index.html" class="btn-cancel-cadastro">Cancelar</a>
+                    <button type="submit" class="btn-submit-cadastro">Salvar Cadastro</button>
+                </div>
+            </form>
+        </section>
+    </div>
+
+</body>
+</html>

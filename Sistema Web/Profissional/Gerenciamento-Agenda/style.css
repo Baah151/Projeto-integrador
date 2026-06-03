@@ -1,0 +1,555 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    background-color: #ECFDF5;
+    overflow-x: hidden;
+}
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.mobile-header {
+    display: none;
+}
+
+.close-menu-btn {
+    display: none;
+}
+
+.menu-overlay-backdrop {
+    display: none;
+}
+
+.sidebar {
+    width: 290px;
+    min-width: 290px;
+    background: linear-gradient(180deg, #046C4E, #10B981);
+    padding: 35px 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.logo img {
+    width: 100%;
+    max-width: 170px;
+    border-radius: 18px;
+    background-color: white;
+    padding: 8px;
+    margin: 0 auto 40px auto;
+    display: block;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+.sidebar nav {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.sidebar nav a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 14px;
+    transition: 0.3s;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.sidebar nav a:hover, .sidebar nav a.active {
+    background-color: rgba(255,255,255,0.18);
+    transform: translateX(6px);
+}
+
+.material-symbols-outlined {
+    font-size: 22px;
+}
+
+.logout {
+    margin-top: 30px;
+}
+
+.logout a {
+    display: block;
+    text-decoration: none;
+    text-align: center;
+    background-color: rgba(255,255,255,0.12);
+    color: white;
+    padding: 12px;
+    border-radius: 14px;
+    font-weight: 600;
+    transition: 0.3s;
+    font-size: 0.9rem;
+}
+
+.logout a:hover {
+    background-color: rgba(255,255,255,0.25);
+}
+
+.main-content {
+    flex: 1;
+    padding: 40px;
+}
+
+.topbar h1 {
+    color: #065F46;
+    font-size: 2.2rem;
+}
+
+.topbar p {
+    color: #4B5563;
+    margin-bottom: 30px;
+    font-size: 0.95rem;
+}
+
+.notifications-container {
+    position: relative;
+}
+
+.icon-btn-bell {
+    background: white;
+    border: none;
+    padding: 12px;
+    border-radius: 15px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: 0.2s;
+}
+
+.icon-btn-bell:hover {
+    background-color: #f9fafb;
+    transform: scale(1.05);
+}
+
+.badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background-color: #ef4444;
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.notifications-dropdown {
+    position: absolute;
+    right: 0;
+    top: 60px;
+    width: 320px;
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    display: none;
+    flex-direction: column;
+    z-index: 100;
+    overflow: hidden;
+    border: 1px solid #e5e7eb;
+}
+
+.notifications-dropdown.show {
+    display: flex;
+}
+
+.dropdown-header {
+    background-color: #f9fafb;
+    padding: 15px 20px;
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: #065F46;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.dropdown-item {
+    padding: 14px 20px;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 0.82rem;
+    color: #4b5563;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: left;
+}
+
+.dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item strong {
+    color: #1f2937;
+}
+
+.setup-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 25px;
+}
+
+.config-card, .summary-card {
+    background: white;
+    padding: 30px;
+    border-radius: 24px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-group label {
+    display: block;
+    font-weight: 600;
+    color: #046C4E;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+}
+
+input[type="date"], 
+.type-select, 
+#time-input,
+input[type="number"] { 
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #E5E7EB;
+    border-radius: 12px;
+    outline: none;
+    font-size: 0.9rem;
+    background: #FAFCF8;
+    color: #374151;
+    transition: 0.2s;
+}
+
+input[type="date"]:focus, 
+.type-select:focus, 
+#time-input:focus,
+input[type="number"]:focus {
+    border-color: #10B981;
+    background: white;
+}
+
+.add-time-row {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-add {
+    background: #10B981;
+    color: white;
+    border: none;
+    padding: 0 25px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    white-space: nowrap;
+}
+
+.btn-add:hover {
+    background: #059669;
+}
+
+.temp-time-list {
+    margin-top: 15px;
+    background: #F9FAFB;
+    padding: 15px;
+    border-radius: 12px;
+    border: 1px solid #F3F4F6;
+}
+
+.label-mini {
+    font-size: 0.75rem;
+    color: #6B7280;
+    margin-bottom: 10px;
+    font-weight: 500;
+}
+
+.chips-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.agenda-chip {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    border: 1px solid #E5E7EB;
+    padding: 10px 15px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: #374151;
+}
+
+.agenda-chip span strong {
+    color: #046C4E;
+}
+
+.btn-del-chip {
+    background: none;
+    border: none;
+    color: #9CA3AF;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-del-chip:hover {
+    color: #EF4444;
+}
+
+.btn-save-agenda {
+    width: 100%;
+    padding: 15px;
+    background: #046C4E;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: 0.3s;
+}
+
+.btn-save-agenda:hover {
+    background: #03543d;
+}
+
+.summary-card h2 {
+    color: #065F46;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.small {
+    font-size: 0.8rem;
+    color: #9CA3AF;
+    margin-bottom: 20px;
+}
+
+.empty-list {
+    text-align: center;
+    padding: 50px 20px;
+    border: 2px dashed #F3F4F6;
+    border-radius: 15px;
+    color: #9CA3AF;
+}
+
+.published-day-block {
+    background: #FAFCF8;
+    border: 1px solid #E5E7EB;
+    border-radius: 14px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.published-day-block h4 {
+    color: #046C4E;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #E5E7EB;
+    padding-bottom: 5px;
+}
+
+.published-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: #4B5563;
+    padding: 6px 0;
+    border-bottom: 1px dashed #E5E7EB;
+}
+
+.published-item:last-child {
+    border-bottom: none;
+}
+
+.btn-remove-published {
+    background: none;
+    border: none;
+    color: #9CA3AF;
+    font-weight: bold;
+    font-size: 0.95rem;
+    cursor: pointer;
+    padding: 0 4px;
+    transition: 0.2s;
+}
+
+.btn-remove-published:hover {
+    color: #EF4444;
+}
+
+.badge-menu {
+    background-color: #ef4444;
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: 0.2s;
+}
+
+@media (max-width: 1100px) {
+    .setup-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 950px) {
+    body {
+        overflow-y: auto !important;
+        height: auto !important;
+    }
+
+    .container { 
+        flex-direction: column; 
+        min-height: 100vh;
+        height: auto;
+    }
+
+    .mobile-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: linear-gradient(135deg, #046C4E 0%, #10B981 100%);
+        padding: 0 20px;
+        position: sticky;
+        top: 0;
+        z-index: 999;
+        width: 100%;
+        height: 70px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+
+    .menu-toggle-btn {
+        background: transparent;
+        border: none;
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .mobile-page-title {
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .mobile-logo img {
+        height: 35px;
+        width: auto;
+        border-radius: 6px;
+        background: white;
+        padding: 2px;
+    }
+
+    .sidebar-top-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .sidebar .logo img {
+        margin: 0;
+        max-width: 120px;
+    }
+
+    .close-menu-btn {
+        display: flex;
+        background: transparent;
+        border: none;
+        color: white;
+        cursor: pointer;
+        padding: 5px;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: -300px;
+        width: 290px;
+        height: 100vh;
+        z-index: 2000;
+        transition: left 0.3s ease-in-out;
+        box-shadow: 5px 0 15px rgba(0,0,0,0.15);
+        justify-content: flex-start;
+        gap: 20px;
+        padding: 30px 20px;
+        overflow-y: auto;
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
+    .sidebar nav {
+        width: 100%;
+    }
+
+    .logout {
+        margin-top: 30px;
+        width: 100%;
+    }
+
+    .menu-overlay-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1500;
+        display: none;
+    }
+
+    .menu-overlay-backdrop.active {
+        display: block;
+    }
+
+    .main-content {
+        padding: 20px 15px;
+        width: 100%;
+        height: auto;
+        overflow: visible;
+    }
+
+    .topbar h1 {
+        font-size: 1.6rem;
+    }
+    
+    .topbar p {
+        font-size: 0.88rem;
+    }
+
+    .notifications-dropdown {
+        right: -15px;
+        top: 55px;
+        width: 290px;
+    }
+}
