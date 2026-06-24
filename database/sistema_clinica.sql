@@ -102,6 +102,28 @@ CREATE TABLE disponibilidade_agenda (
         FOREIGN KEY (id_profissional) REFERENCES profissional(id_profissional)
 );
 
+CREATE TABLE tratamentos (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(150) NOT NULL,
+    descricao TEXT,
+    duracao_minutos INTEGER,
+    valor NUMERIC(10,2)
+);
+
+CREATE TABLE paciente_tratamento (
+    id SERIAL PRIMARY KEY,
+    paciente_id INTEGER NOT NULL REFERENCES pacientes(id) ON DELETE CASCADE,
+    tratamento_id INTEGER NOT NULL REFERENCES tratamentos(id) ON DELETE RESTRICT,
+    data_inicio DATE NOT NULL DEFAULT CURRENT_DATE,
+    data_fim DATE,
+    status VARCHAR(20) NOT NULL DEFAULT 'em andamento'
+        CHECK (status IN ('em andamento', 'concluido', 'cancelado')),
+    observacoes TEXT
+);
+
+CREATE INDEX idx_paciente_tratamento_paciente ON paciente_tratamento(paciente_id);
+CREATE INDEX idx_paciente_tratamento_tratamento ON paciente_tratamento(tratamento_id);
+
 INSERT INTO paciente (nome, cpf, nascimento, email, telefone, senha, cidade, estado)
 VALUES ('Ana Carolina', '123.456.789-00', '2005-08-15', 'ana@email.com', '(48)99999-9999', '123456', 'Araranguá', 'SC');
 
