@@ -109,3 +109,19 @@ export async function resetPassword(token: string, novaSenha: string) {
     [hash, decoded.id]
   );
 }
+
+export async function gerarTokenParaProfissional(profissionalId: number) {
+  if (!profissionalId || profissionalId <= 0) throw new Error('ID do profissional invalido');
+
+  const result = await pool.query(
+    'SELECT id_profissional, nome, email FROM profissional WHERE id_profissional = $1',
+    [profissionalId]
+  );
+  const row = result.rows[0];
+  if (!row) throw new Error('Profissional nao encontrado');
+
+  const token = generateToken(row.id_profissional as number, row.email as string);
+  return { profissional: { id: row.id_profissional, nome: row.nome, email: row.email }, token };
+}
+
+
