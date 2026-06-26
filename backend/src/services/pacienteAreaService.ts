@@ -4,7 +4,7 @@ import { inserirTramite } from './tramiteService.js';
 
 export async function getMe(pacienteId: number) {
   const result = await pool.query(
-    `SELECT id_paciente, nome, cpf, nascimento, email, telefone, cep, logradouro, numero, bairro, complemento, cidade, estado
+    `SELECT id_paciente, nome, cpf, nascimento, email, telefone, cep, logradouro, numero, bairro, complemento, cidade, estado, foto_base64
      FROM paciente WHERE id_paciente = $1`,
     [pacienteId]
   );
@@ -18,7 +18,7 @@ export async function updateMe(pacienteId: number, data: Record<string, unknown>
   const values: unknown[] = [];
   let idx = 1;
 
-  const allowed = ['nome', 'telefone', 'cep', 'logradouro', 'numero', 'bairro', 'complemento', 'cidade', 'estado'];
+  const allowed = ['nome', 'telefone', 'cep', 'logradouro', 'numero', 'bairro', 'complemento', 'cidade', 'estado', 'foto_base64'];
   for (const key of allowed) {
     if (key in data) {
       fields.push(`${key} = $${idx++}`);
@@ -75,6 +75,18 @@ export async function deleteMe(pacienteId: number) {
   } finally {
     client.release();
   }
+}
+
+export async function verificarSenhaEObterCpf(pacienteId: number, senha: string): Promise<string> {
+  const result = await pool.query(
+    'SELECT cpf, senha FROM paciente WHERE id_paciente = $1',
+    [pacienteId]
+  );
+  const row = result.rows[0] as { cpf: string; senha: string } | undefined;
+  if (!row) throw new Error('Paciente nao encontrado');
+  const valido = await bcrypt.compare(senha, row.senha);
+  if (!valido) throw new Error('Senha incorreta');
+  return row.cpf;
 }
 
 export async function getDisponibilidade() {

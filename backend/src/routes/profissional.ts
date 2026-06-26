@@ -9,6 +9,7 @@ router.use(authMiddleware);
 router.get('/:id', profissionalController.getById);
 router.put('/:id', profissionalController.updateById);
 router.get('/:id/dashboard', profissionalController.getDashboard);
+router.post('/:id/cpf', profissionalController.getCpfComSenha);
 router.delete('/:id', profissionalController.deleteById);
 
 export default router;

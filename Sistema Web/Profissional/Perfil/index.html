@@ -105,6 +105,16 @@
                         <h3>Contatos e Segurança</h3>
                         <form id="form-dados-seguranca">
                             <div class="input-group">
+                                <label>CPF</label>
+                                <div class="cpf-reveal-row">
+                                    <span class="cpf-masked" id="cpf-display">•••.•••.•••-••</span>
+                                    <button type="button" class="btn-reveal-cpf" id="btn-reveal-cpf" title="Visualizar CPF">
+                                        <span class="material-symbols-outlined" style="font-size:18px;">lock</span>
+                                        Visualizar CPF
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="input-group">
                                 <label for="email">E-mail de Acesso</label>
                                 <input type="email" id="email" placeholder="Ex: contato@luanadamazio.com">
                             </div>
@@ -183,6 +193,27 @@
     </div>
 
     <div class="menu-overlay-backdrop" id="menu-backdrop"></div>
+
+    <!-- Modal de verificação de senha para revelar CPF -->
+    <div class="modal-overlay" id="modal-cpf-overlay">
+        <div class="modal-cpf">
+            <div class="modal-cpf-header">
+                <span class="material-symbols-outlined" style="font-size:28px;color:#046C4E;">shield_lock</span>
+                <h4>Confirmação de Identidade</h4>
+                <button type="button" class="modal-cpf-close" id="modal-cpf-close">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <p class="modal-cpf-desc">Digite sua senha para visualizar o CPF cadastrado.</p>
+            <div class="input-group password-wrapper" style="margin-bottom:16px;">
+                <div class="input-container">
+                    <input type="password" id="modal-senha-input" placeholder="Digite sua senha">
+                    <span class="material-symbols-outlined eye-icon" id="modal-eye">visibility</span>
+                </div>
+            </div>
+            <button type="button" class="btn-save" id="btn-confirmar-cpf">Confirmar</button>
+        </div>
+    </div>
 
 </body>
 </html>

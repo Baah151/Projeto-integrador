@@ -37,8 +37,7 @@ function renderizarTabela(lista) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td><strong>${p.nome || '--'}</strong></td>
-      <td>${p.cpf || '--'}</td>
-      <td>${p.telefone || '--'}</td>
+      <td>${formatarTelefone(p.telefone)}</td>
       <td>${formatarDataBR(p.nascimento)}</td>
       <td style="text-align:right;"><button class="btn-details" data-id="${p.id_paciente}">Ver Detalhes</button></td>
     `;

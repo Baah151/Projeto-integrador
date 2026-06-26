@@ -50,12 +50,7 @@
                 <a href="../financeiro/index.html">
                     <span class="material-symbols-outlined">payments</span> Financeiro
                 </a>
-                <a href="../histórico/index.html" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span class="material-symbols-outlined">history</span> Histórico
-                    </div>
-                    <span class="menu-badge" id="history-notif-badge" style="display: none;">0</span>
-                </a>
+
                 <a href="../perfil/index.html" class="active">
                     <span class="material-symbols-outlined">person</span> Perfil
                 </a>
@@ -81,7 +76,9 @@
                         <div class="profile-header">
                             <div class="avatar-container">
                                 <img src="../assets/user-placeholder.png" alt="Foto de Perfil" id="profile-img">
-                                <label for="upload-photo" class="upload-badge">📷</label>
+                                <label for="upload-photo" class="upload-badge" title="Alterar foto">
+                                    <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">photo_camera</span>
+                                </label>
                                 <input type="file" id="upload-photo" accept="image/*" style="display:none;" onchange="previewImage()">
                             </div>
                             <div class="header-text">
@@ -101,7 +98,12 @@
                             <div class="input-row">
                                 <div class="input-group">
                                     <label>CPF</label>
-                                    <input type="text" id="reg-cpf" placeholder="000.000.000-00" maxlength="14" required>
+                                    <div class="cpf-paciente-row">
+                                        <span id="cpf-paciente-display" class="cpf-masked-value">•••.•••.•••-••</span>
+                                        <button type="button" id="btn-reveal-cpf-paciente" class="btn-cpf-lock" title="Revelar CPF">
+                                            <span class="material-symbols-outlined" style="font-size:18px;">lock</span>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="input-group">
                                     <label>Data de Nascimento</label>
@@ -163,28 +165,31 @@
                             <div class="input-row">
                                 <div class="input-group">
                                     <label>Telefone / WhatsApp</label>
-                                    <input type="text" id="contato-telefone" placeholder="DDD + Número" maxlength="15" required>
+                                    <input type="text" id="contato-telefone" placeholder="(00) 00000-0000" maxlength="15" required>
                                 </div>
                             </div>
-                            <div class="input-row">
-                                <div class="input-group">
-                                    <label>Nova Senha</label>
-                                    <div class="password-wrapper">
-                                        <input type="password" id="acesso-senha" placeholder="Digite nova senha">
-                                        <button type="button" class="toggle-button" onclick="togglePasswordVisibility('acesso-senha', 'img-senha')">
-                                            <img src="https://api.iconify.design/material-symbols:visibility-outline.svg?color=%239ca3af" class="eye-icon" id="img-senha" alt="Olho">
-                                        </button>
+                            <!-- Seção de senha: só aparece no modo edição -->
+                            <div id="secao-senha" style="display:none;">
+                                <div class="input-row">
+                                    <div class="input-group">
+                                        <label>Nova Senha <span style="font-size:0.75rem;color:#9CA3AF;">(opcional)</span></label>
+                                        <div class="password-wrapper">
+                                            <input type="password" id="acesso-senha" placeholder="Deixe em branco para manter">
+                                            <button type="button" class="toggle-button" onclick="togglePasswordVisibility('acesso-senha', 'img-senha')">
+                                                <img src="https://api.iconify.design/material-symbols:visibility-outline.svg?color=%239ca3af" class="eye-icon" id="img-senha" alt="Olho">
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="input-row">
-                                <div class="input-group">
-                                    <label>Confirmar Nova Senha</label>
-                                    <div class="password-wrapper">
-                                        <input type="password" id="acesso-confirmar" placeholder="Repita a nova senha">
-                                        <button type="button" class="toggle-button" onclick="togglePasswordVisibility('acesso-confirmar', 'img-confirmar')">
-                                            <img src="https://api.iconify.design/material-symbols:visibility-outline.svg?color=%239ca3af" class="eye-icon" id="img-confirmar" alt="Olho">
-                                        </button>
+                                <div class="input-row">
+                                    <div class="input-group">
+                                        <label>Confirmar Nova Senha</label>
+                                        <div class="password-wrapper">
+                                            <input type="password" id="acesso-confirmar" placeholder="Repita a nova senha">
+                                            <button type="button" class="toggle-button" onclick="togglePasswordVisibility('acesso-confirmar', 'img-confirmar')">
+                                                <img src="https://api.iconify.design/material-symbols:visibility-outline.svg?color=%239ca3af" class="eye-icon" id="img-confirmar" alt="Olho">
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -193,7 +198,12 @@
 
                     <div class="form-actions">
                         <button type="button" class="btn-delete" onclick="abrirModalExcluir()">Excluir Conta</button>
-                        <button type="submit" class="btn-save">Salvar Alterações</button>
+                        <button type="button" class="btn-liberar" id="btn-liberar-edicao">
+                            <span class="material-symbols-outlined" style="font-size:18px;vertical-align:middle;">edit</span>
+                            Editar Perfil
+                        </button>
+                        <button type="button" class="btn-cancelar-ed" id="btn-cancelar-edicao" style="display:none;">Cancelar</button>
+                        <button type="submit" class="btn-save" id="btn-salvar" style="display:none;">Salvar Alterações</button>
                     </div>
 
                     <div class="form-footer">
@@ -242,6 +252,28 @@
             <div class="modal-buttons">
                 <button type="button" class="btn-modal-cancel" onclick="fecharModalExcluir()">Cancelar</button>
                 <button type="button" class="btn-modal-danger" onclick="confirmarExclusao()">Finalizar Exclusão</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal revelar CPF -->
+    <div class="modal-overlay" id="modal-cpf-paciente">
+        <div class="modal-card">
+            <span class="material-symbols-outlined modal-icon icon-confirm">shield_person</span>
+            <h2>Confirmar Identidade</h2>
+            <p>Digite sua senha para visualizar seu CPF. O número ficará visível por 30 segundos.</p>
+            <div class="input-group style-modal-input">
+                <label>Sua Senha</label>
+                <div class="password-wrapper">
+                    <input type="password" id="input-senha-cpf-paciente" placeholder="Digite sua senha">
+                    <button type="button" class="toggle-button" onclick="togglePasswordVisibility('input-senha-cpf-paciente','img-senha-cpf-pac')">
+                        <img src="https://api.iconify.design/material-symbols:visibility-outline.svg?color=%239ca3af" class="eye-icon" id="img-senha-cpf-pac" alt="Olho">
+                    </button>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button type="button" class="btn-modal-cancel" onclick="fecharModalCpfPaciente()">Cancelar</button>
+                <button type="button" class="btn-modal-confirm" onclick="confirmarRevealCpfPaciente()">Visualizar CPF</button>
             </div>
         </div>
     </div>

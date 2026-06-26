@@ -57,6 +57,10 @@ export async function runMigrations(): Promise<void> {
     `CREATE INDEX IF NOT EXISTS idx_tramite_agendamento ON tramite(id_agendamento)`,
     // rastreamento de reagendamento: id_reagendado_de aponta para o agendamento original
     `ALTER TABLE agendamento ADD COLUMN IF NOT EXISTS id_reagendado_de INT REFERENCES agendamento(id_agendamento)`,
+    // observações clínicas do profissional sobre o paciente
+    `ALTER TABLE paciente ADD COLUMN IF NOT EXISTS observacoes TEXT`,
+    // foto de perfil do paciente (base64)
+    `ALTER TABLE paciente ADD COLUMN IF NOT EXISTS foto_base64 TEXT`,
   ];
 
   // Executa migrations em série com um único cliente para não abrir múltiplas conexões

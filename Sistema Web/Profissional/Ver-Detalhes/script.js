@@ -23,9 +23,13 @@ function popularHeader(p) {
   const el = (id) => document.getElementById(id);
   if (el('detalhe-nome-header')) el('detalhe-nome-header').textContent = p.nome || '--';
   if (el('detalhe-sub-registro')) {
-    el('detalhe-sub-registro').textContent = `Idade: ${calcularIdade(p.nascimento)} anos • Nasc: ${formatarDataBR(p.nascimento)} • CPF: ${p.cpf || '--'}`;
+    el('detalhe-sub-registro').textContent = `Idade: ${calcularIdade(p.nascimento)} anos • Nasc: ${formatarDataBR(p.nascimento)}`;
   }
-  if (el('detalhe-txt-telefone')) el('detalhe-txt-telefone').textContent = p.telefone || '--';
+  const cpfDisplay = document.getElementById('prontuario-cpf-display');
+  if (cpfDisplay) cpfDisplay.textContent = '•••.•••.•••-••';
+  const btnRevealCpf = document.getElementById('btn-reveal-cpf-prontuario');
+  if (btnRevealCpf) btnRevealCpf.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;">lock</span>';
+  if (el('detalhe-txt-telefone')) el('detalhe-txt-telefone').textContent = formatarTelefone(p.telefone);
   if (el('detalhe-txt-email')) el('detalhe-txt-email').textContent = p.email || '--';
   const endereco = [p.logradouro, p.numero, p.bairro, p.cidade, p.estado].filter(Boolean).join(', ');
   if (el('detalhe-txt-endereco')) el('detalhe-txt-endereco').textContent = endereco || 'Endereço não informado';
@@ -33,7 +37,7 @@ function popularHeader(p) {
 }
 
 function popularModalEditar(p) {
-  const campos = ['nome', 'cpf', 'nascimento', 'email', 'telefone', 'cep', 'logradouro', 'numero', 'bairro', 'complemento', 'cidade', 'estado'];
+  const campos = ['nome', 'nascimento', 'email', 'telefone', 'cep', 'logradouro', 'numero', 'bairro', 'complemento', 'cidade', 'estado'];
   campos.forEach(c => {
     const el = document.getElementById(`edit-${c}`);
     if (el) el.value = p[c] || '';
@@ -263,7 +267,6 @@ function configurarModalEditar(pacienteId) {
       e.preventDefault();
       dadosPendentes = {
         nome: document.getElementById('edit-nome')?.value.trim(),
-        cpf: document.getElementById('edit-cpf')?.value,
         nascimento: document.getElementById('edit-nascimento')?.value,
         email: document.getElementById('edit-email')?.value.trim(),
         telefone: document.getElementById('edit-telefone')?.value,
@@ -372,6 +375,73 @@ window.addEventListener('DOMContentLoaded', async () => {
   configurarModalAgendar(pacienteId);
   configurarModalEditar(pacienteId);
   configurarModalExcluir(pacienteId);
+
+  // ─── CPF PROTEGIDO POR SENHA ─────────────────────────────
+  const modalCpf = document.getElementById('modal-cpf-prontuario');
+  const btnReveal = document.getElementById('btn-reveal-cpf-prontuario');
+  const btnFecharCpf = document.getElementById('btn-fechar-modal-cpf');
+  const btnCancelarCpf = document.getElementById('btn-cancelar-modal-cpf');
+  const btnConfirmarCpf = document.getElementById('btn-confirmar-cpf-prontuario');
+  const senhaInputCpf = document.getElementById('modal-cpf-senha');
+  const eyeCpf = document.getElementById('modal-cpf-eye');
+  const cpfDisplayEl = document.getElementById('prontuario-cpf-display');
+  let cpfTimer = null;
+
+  const abrirModalCpf = () => {
+    if (senhaInputCpf) { senhaInputCpf.value = ''; senhaInputCpf.type = 'password'; }
+    if (eyeCpf) eyeCpf.textContent = 'visibility';
+    modalCpf?.classList.add('active');
+    setTimeout(() => senhaInputCpf?.focus(), 100);
+  };
+
+  const fecharModalCpf = () => modalCpf?.classList.remove('active');
+
+  const mascarCpf = () => {
+    if (cpfDisplayEl) cpfDisplayEl.textContent = '•••.•••.•••-••';
+    if (btnReveal) btnReveal.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;">lock</span>';
+    clearTimeout(cpfTimer);
+  };
+
+  btnReveal?.addEventListener('click', abrirModalCpf);
+  btnFecharCpf?.addEventListener('click', fecharModalCpf);
+  btnCancelarCpf?.addEventListener('click', fecharModalCpf);
+
+  eyeCpf?.addEventListener('click', () => {
+    if (!senhaInputCpf) return;
+    senhaInputCpf.type = senhaInputCpf.type === 'password' ? 'text' : 'password';
+    eyeCpf.textContent = senhaInputCpf.type === 'password' ? 'visibility' : 'visibility_off';
+  });
+
+  senhaInputCpf?.addEventListener('keydown', (e) => { if (e.key === 'Enter') btnConfirmarCpf?.click(); });
+
+  btnConfirmarCpf?.addEventListener('click', async () => {
+    const senha = senhaInputCpf?.value?.trim();
+    if (!senha) { showNotification('Digite sua senha.', 'error'); return; }
+
+    const usuario = getUsuario();
+    btnConfirmarCpf.disabled = true;
+    btnConfirmarCpf.textContent = 'Verificando...';
+
+    try {
+      await revelarCpfProfissional(usuario?.id, senha);
+      fecharModalCpf();
+
+      if (cpfDisplayEl) cpfDisplayEl.textContent = formatarCpf(pacienteAtual?.cpf);
+      if (btnReveal) {
+        btnReveal.innerHTML = '<span class="material-symbols-outlined" style="font-size:16px;">lock_open</span>';
+        btnReveal.onclick = mascarCpf;
+      }
+
+      clearTimeout(cpfTimer);
+      cpfTimer = setTimeout(mascarCpf, 30000);
+      showNotification('CPF revelado. Será ocultado em 30 segundos.');
+    } catch (err) {
+      showNotification(err.message || 'Senha incorreta.', 'error');
+    } finally {
+      btnConfirmarCpf.disabled = false;
+      btnConfirmarCpf.textContent = 'Confirmar';
+    }
+  });
 
   // ─── MODAL EDITAR TRÂMITE ────────────────────────────────
   const modalTramite = document.getElementById('modal-editar-tramite');

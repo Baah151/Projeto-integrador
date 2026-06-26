@@ -1,13 +1,13 @@
 const dadosClinica = {
-    email: "",
-    telefone: "",
-    cep: "",
-    logradouro: "",
-    numero: "",
+    email: "emailteste@gmail.com",
+    telefone: "(48) 9948-9919",
+    cep: "88809-440",
+    logradouro: "R. João Paes",
+    numero: "195",
     complemento: "",
-    bairro: "",
-    cidade: "",
-    uf: ""
+    bairro: "Santa Augusta",
+    cidade: "Criciúma",
+    uf: "SC"
 };
 
 function renderizarContatos() {

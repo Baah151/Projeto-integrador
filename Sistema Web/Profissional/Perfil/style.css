@@ -404,3 +404,90 @@ body {
         font-size: 0.88rem;
     }
 }
+
+/* ── CPF protegido ─────────────────────────────────────── */
+.cpf-reveal-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: #F9FAFB;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 12px;
+}
+
+.cpf-masked {
+    flex: 1;
+    font-size: 0.95rem;
+    font-family: monospace;
+    letter-spacing: 1.5px;
+    color: #374151;
+}
+
+.btn-reveal-cpf {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #046C4E;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.btn-reveal-cpf:hover { background: #065F46; }
+
+/* ── Modal CPF ─────────────────────────────────────────── */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+.modal-overlay.ativo { display: flex; }
+
+.modal-cpf {
+    background: white;
+    border-radius: 20px;
+    padding: 28px 28px 24px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+}
+
+.modal-cpf-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+.modal-cpf-header h4 {
+    flex: 1;
+    font-size: 1rem;
+    color: #111827;
+}
+.modal-cpf-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #9CA3AF;
+    display: flex;
+    padding: 2px;
+    border-radius: 6px;
+}
+.modal-cpf-close:hover { color: #374151; background: #F3F4F6; }
+
+.modal-cpf-desc {
+    font-size: 0.85rem;
+    color: #6B7280;
+    margin-bottom: 18px;
+}

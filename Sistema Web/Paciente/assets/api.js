@@ -71,6 +71,10 @@ async function excluirContaPaciente(motivo) {
   return apiRequest('DELETE', '/paciente/me', { motivo });
 }
 
+async function revelarCpfPaciente(senha) {
+  return apiRequest('POST', '/paciente/me/cpf', { senha });
+}
+
 // ─── DISPONIBILIDADE ─────────────────────────────────────────────────────────
 
 async function obterDisponibilidade() {
@@ -128,6 +132,21 @@ async function listarSessoesPaciente() {
 }
 
 // ─── NOTIFICAÇÕES ────────────────────────────────────────────────────────────
+
+function formatarTelefone(tel) {
+  if (!tel) return '';
+  const n = String(tel).replace(/\D/g, '');
+  if (n.length === 11) return `(${n.slice(0,2)}) ${n.slice(2,7)}-${n.slice(7)}`;
+  if (n.length === 10) return `(${n.slice(0,2)}) ${n.slice(2,6)}-${n.slice(6)}`;
+  return tel;
+}
+
+function formatarCpf(cpf) {
+  if (!cpf) return '';
+  const n = String(cpf).replace(/\D/g, '');
+  if (n.length === 11) return `${n.slice(0,3)}.${n.slice(3,6)}.${n.slice(6,9)}-${n.slice(9)}`;
+  return cpf;
+}
 
 function showNotification(message, type = 'success') {
   document.querySelectorAll('.api-toast').forEach(t => t.remove());

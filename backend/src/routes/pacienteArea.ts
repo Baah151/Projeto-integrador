@@ -9,6 +9,7 @@ router.use(authPacienteMiddleware);
 router.get('/me', pacienteAreaController.getMe);
 router.put('/me', pacienteAreaController.updateMe);
 router.delete('/me', pacienteAreaController.deleteMe);
+router.post('/me/cpf', pacienteAreaController.getCpfComSenha);
 
 router.get('/disponibilidade', pacienteAreaController.getDisponibilidade);
 

@@ -30,7 +30,7 @@ export async function findAll(_profissionalId: number) {
 export async function findById(id: number, _profissionalId: number) {
   const result = await pool.query(
     `SELECT id_paciente, nome, cpf, email, telefone,
-            nascimento, cep, logradouro, numero, bairro, complemento, cidade, estado
+            nascimento, cep, logradouro, numero, bairro, complemento, cidade, estado, observacoes
      FROM paciente
      WHERE id_paciente = $1`,
     [id]
@@ -73,7 +73,7 @@ export async function update(id: number, data: Record<string, unknown>) {
   const values: unknown[] = [];
   let idx = 1;
 
-  const allowed = ['nome', 'telefone', 'cep', 'logradouro', 'numero', 'bairro', 'complemento', 'cidade', 'estado', 'nascimento'];
+  const allowed = ['nome', 'telefone', 'cep', 'logradouro', 'numero', 'bairro', 'complemento', 'cidade', 'estado', 'nascimento', 'observacoes'];
   for (const key of allowed) {
     if (key in data) {
       fields.push(`${key} = $${idx++}`);
@@ -95,11 +95,58 @@ export async function update(id: number, data: Record<string, unknown>) {
 }
 
 export async function deleteById(id: number) {
-  const result = await pool.query(
-    'DELETE FROM paciente WHERE id_paciente = $1 RETURNING id_paciente',
-    [id]
-  );
-  if ((result.rowCount ?? 0) === 0) throw new Error('Paciente nao encontrado');
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // 1. Remove auto-referência entre agendamentos do paciente
+    await client.query(
+      `UPDATE agendamento SET id_reagendado_de = NULL WHERE id_paciente = $1`,
+      [id]
+    );
+
+    // 2. Financeiro → depende de consulta
+    await client.query(
+      `DELETE FROM financeiro WHERE id_consulta IN (
+         SELECT c.id_consulta FROM consulta c
+         JOIN agendamento a ON c.id_agendamento = a.id_agendamento
+         WHERE a.id_paciente = $1
+       )`,
+      [id]
+    );
+
+    // 3. Histórico → depende de paciente e consulta
+    await client.query(`DELETE FROM historico WHERE id_paciente = $1`, [id]);
+
+    // 4. Consulta → depende de agendamento e paciente
+    await client.query(
+      `DELETE FROM consulta WHERE id_agendamento IN (
+         SELECT id_agendamento FROM agendamento WHERE id_paciente = $1
+       ) OR id_paciente = $1`,
+      [id]
+    );
+
+    // 5. Documento → depende de paciente (tramite cascata do agendamento)
+    await client.query(`DELETE FROM documento WHERE id_paciente = $1`, [id]);
+
+    // 7. Agendamento → tramite e sessao_consulta cascateiam automaticamente
+    await client.query(`DELETE FROM agendamento WHERE id_paciente = $1`, [id]);
+
+    // 8. Paciente → sessao_consulta cascateia via id_paciente ON DELETE CASCADE
+    const result = await client.query(
+      `DELETE FROM paciente WHERE id_paciente = $1 RETURNING id_paciente`,
+      [id]
+    );
+
+    await client.query('COMMIT');
+
+    if ((result.rowCount ?? 0) === 0) throw new Error('Paciente nao encontrado');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 export async function getHistorico(id: number, profissionalId: number) {

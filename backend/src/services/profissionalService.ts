@@ -3,7 +3,7 @@ import pool from '../config/database.js';
 
 export async function findById(id: number) {
   const result = await pool.query(
-    `SELECT id_profissional, nome, cpf, nascimento, email, telefone,
+    `SELECT id_profissional, nome, nascimento, email, telefone,
             cep, logradouro, numero, bairro, complemento, cidade, estado
      FROM profissional WHERE id_profissional = $1`,
     [id]
@@ -11,6 +11,18 @@ export async function findById(id: number) {
   const row = result.rows[0];
   if (!row) throw new Error('Profissional nao encontrado');
   return row;
+}
+
+export async function verificarSenhaEObterCpf(id: number, senha: string) {
+  const res = await pool.query(
+    'SELECT senha, cpf FROM profissional WHERE id_profissional = $1',
+    [id]
+  );
+  const row = res.rows[0] as { senha: string; cpf: string } | undefined;
+  if (!row) throw new Error('Profissional nao encontrado');
+  const valida = await bcrypt.compare(senha, row.senha);
+  if (!valida) throw new Error('Senha incorreta');
+  return row.cpf as string;
 }
 
 export async function update(id: number, data: Record<string, unknown>) {

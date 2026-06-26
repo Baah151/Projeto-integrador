@@ -35,6 +35,22 @@ export async function getDashboard(req: Request, res: Response): Promise<void> {
   }
 }
 
+export async function getCpfComSenha(req: Request, res: Response): Promise<void> {
+  try {
+    const id = Number(req.params['id']);
+    const { senha } = req.body as { senha?: string };
+    if (!senha) {
+      res.status(400).json(errorResponse('Senha obrigatoria', 'VALIDATION_ERROR'));
+      return;
+    }
+    const cpf = await profissionalService.verificarSenhaEObterCpf(id, senha);
+    res.status(200).json(successResponse({ cpf }));
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Erro';
+    res.status(400).json(errorResponse(msg, 'AUTH_ERROR'));
+  }
+}
+
 export async function deleteById(req: Request, res: Response): Promise<void> {
   try {
     const id = Number(req.params['id']);

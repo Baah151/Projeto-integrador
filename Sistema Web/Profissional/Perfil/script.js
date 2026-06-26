@@ -155,4 +155,88 @@ window.addEventListener('DOMContentLoaded', async () => {
       }
     });
   });
+
+  // ── Revelar CPF com senha ─────────────────────────────────
+  let cpfTimer = null;
+
+  const overlay = document.getElementById('modal-cpf-overlay');
+  const btnReveal = document.getElementById('btn-reveal-cpf');
+  const btnFecharModal = document.getElementById('modal-cpf-close');
+  const btnConfirmar = document.getElementById('btn-confirmar-cpf');
+  const senhaInput = document.getElementById('modal-senha-input');
+  const cpfDisplay = document.getElementById('cpf-display');
+  const modalEye = document.getElementById('modal-eye');
+
+  function abrirModalCpf() {
+    if (senhaInput) senhaInput.value = '';
+    if (senhaInput) senhaInput.type = 'password';
+    if (modalEye) modalEye.textContent = 'visibility';
+    overlay?.classList.add('ativo');
+    setTimeout(() => senhaInput?.focus(), 100);
+  }
+
+  function fecharModalCpf() {
+    overlay?.classList.remove('ativo');
+    if (senhaInput) senhaInput.value = '';
+  }
+
+  function mascarCpf() {
+    if (cpfDisplay) cpfDisplay.textContent = '•••.•••.•••-••';
+    if (btnReveal) {
+      btnReveal.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">lock</span> Visualizar CPF';
+    }
+    clearTimeout(cpfTimer);
+  }
+
+  btnReveal?.addEventListener('click', abrirModalCpf);
+  btnFecharModal?.addEventListener('click', fecharModalCpf);
+  overlay?.addEventListener('click', (e) => { if (e.target === overlay) fecharModalCpf(); });
+
+  if (modalEye) {
+    modalEye.addEventListener('click', () => {
+      if (!senhaInput) return;
+      if (senhaInput.type === 'password') {
+        senhaInput.type = 'text';
+        modalEye.textContent = 'visibility_off';
+      } else {
+        senhaInput.type = 'password';
+        modalEye.textContent = 'visibility';
+      }
+    });
+  }
+
+  senhaInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') btnConfirmar?.click();
+  });
+
+  btnConfirmar?.addEventListener('click', async () => {
+    const senha = senhaInput?.value?.trim();
+    if (!senha) { showNotification('Digite sua senha.', 'error'); return; }
+
+    btnConfirmar.disabled = true;
+    btnConfirmar.textContent = 'Verificando...';
+
+    try {
+      const resultado = await revelarCpfProfissional(profissionalId, senha);
+      const cpf = resultado?.cpf || resultado;
+
+      fecharModalCpf();
+
+      if (cpfDisplay) cpfDisplay.textContent = formatarCpf(cpf);
+      if (btnReveal) {
+        btnReveal.innerHTML = '<span class="material-symbols-outlined" style="font-size:18px;">lock_open</span> Ocultar';
+        btnReveal.onclick = mascarCpf;
+      }
+
+      clearTimeout(cpfTimer);
+      cpfTimer = setTimeout(mascarCpf, 30000);
+
+      showNotification('CPF revelado. Será ocultado em 30 segundos.');
+    } catch (err) {
+      showNotification(err.message || 'Senha incorreta.', 'error');
+    } finally {
+      btnConfirmar.disabled = false;
+      btnConfirmar.textContent = 'Confirmar';
+    }
+  });
 });

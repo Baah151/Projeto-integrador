@@ -113,6 +113,38 @@ body {
     font-size: 0.88rem;
 }
 
+.cpf-prontuario-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+    font-size: 0.88rem;
+    color: #4B5563;
+}
+
+.cpf-label { font-weight: 600; color: #374151; }
+
+.cpf-masked-value {
+    font-family: monospace;
+    letter-spacing: 1px;
+    color: #374151;
+}
+
+.btn-cpf-lock {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #F0FDF4;
+    border: 1.5px solid #A7F3D0;
+    border-radius: 8px;
+    padding: 3px 8px;
+    cursor: pointer;
+    color: #046C4E;
+    transition: background 0.2s;
+    line-height: 1;
+}
+.btn-cpf-lock:hover { background: #D1FAE5; }
+
 .contact-item span.material-symbols-outlined {
     font-size: 18px;
     color: #046C4E;

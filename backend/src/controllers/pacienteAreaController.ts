@@ -37,6 +37,22 @@ export async function deleteMe(req: Request, res: Response): Promise<void> {
   }
 }
 
+export async function getCpfComSenha(req: Request, res: Response): Promise<void> {
+  try {
+    const id = req.paciente!.id;
+    const { senha } = req.body as { senha?: string };
+    if (!senha) {
+      res.status(400).json(errorResponse('Senha obrigatoria', 'VALIDATION_ERROR'));
+      return;
+    }
+    const cpf = await pacienteAreaService.verificarSenhaEObterCpf(id, senha);
+    res.status(200).json(successResponse({ cpf }));
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Erro';
+    res.status(400).json(errorResponse(msg, 'AUTH_ERROR'));
+  }
+}
+
 export async function getDisponibilidade(_req: Request, res: Response): Promise<void> {
   try {
     const data = await pacienteAreaService.getDisponibilidade();

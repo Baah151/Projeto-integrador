@@ -38,6 +38,23 @@ function verificarProfissional() {
   return verificarAutenticacao();
 }
 
+// ─── FORMATADORES BRASILEIROS ──────────────────────────────
+
+function formatarTelefone(tel) {
+  if (!tel) return '--';
+  const n = String(tel).replace(/\D/g, '');
+  if (n.length === 11) return `(${n.slice(0,2)}) ${n.slice(2,7)}-${n.slice(7)}`;
+  if (n.length === 10) return `(${n.slice(0,2)}) ${n.slice(2,6)}-${n.slice(6)}`;
+  return tel;
+}
+
+function formatarCpf(cpf) {
+  if (!cpf) return '--';
+  const n = String(cpf).replace(/\D/g, '');
+  if (n.length === 11) return `${n.slice(0,3)}.${n.slice(3,6)}.${n.slice(6,9)}-${n.slice(9)}`;
+  return cpf;
+}
+
 // ─── NOTIFICAÇÕES TOAST ────────────────────────────────────
 
 function showNotification(message, type = 'success') {
@@ -129,6 +146,10 @@ async function obterProfissional(id) {
 
 async function atualizarProfissional(id, dados) {
   return await apiRequest('PUT', `/profissional/${id}`, dados);
+}
+
+async function revelarCpfProfissional(id, senha) {
+  return await apiRequest('POST', `/profissional/${id}/cpf`, { senha });
 }
 
 async function obterDashboard(id) {

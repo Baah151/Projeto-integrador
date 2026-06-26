@@ -117,16 +117,10 @@
                     <input type="text" id="search-input" placeholder="Buscar por nome, CPF ou telefone...">
                     <button class="btn-search" id="btn-buscar">Buscar</button>
                 </div>
-                <div style="display:flex;gap:12px;align-items:center;">
-                    <a href="../cadastro/index.html" class="btn-add-patient">
-                        <span class="material-symbols-outlined">person_add</span>
-                        Cadastrar Paciente
-                    </a>
-                    <button class="btn-limpar-dados" id="btn-limpar-pacientes">
-                        <span class="material-symbols-outlined">delete_sweep</span>
-                        Limpar Dados de Teste
-                    </button>
-                </div>
+                <a href="../cadastro/index.html" class="btn-add-patient">
+                    <span class="material-symbols-outlined">person_add</span>
+                    Cadastrar Paciente
+                </a>
             </div>
 
             <section class="patients-section">
@@ -135,15 +129,14 @@
                         <thead>
                             <tr>
                                 <th>Nome Completo</th>
-                                <th>CPF</th>
                                 <th>Telefone</th>
-                                <th>Data de Cadastro</th>
+                                <th>Data de Nascimento</th>
                                 <th style="text-align: right; padding-right: 25px;">Prontuário</th>
                             </tr>
                         </thead>
                         <tbody id="patients-rows">
                             <tr id="empty-row" class="empty-row" style="display: none;">
-                                <td colspan="5">
+                                <td colspan="4">
                                     <div class="empty-state-content">
                                         <span class="empty-icon">👥</span>
                                         <p>Nenhum paciente cadastrado até o momento.</p>

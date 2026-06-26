@@ -161,7 +161,7 @@ body {
     position: absolute;
     bottom: -5px;
     right: -5px;
-    background: #00BF63;
+    background: #046C4E;
     width: 36px;
     height: 36px;
     border-radius: 10px;
@@ -172,8 +172,10 @@ body {
     font-size: 1rem;
     cursor: pointer;
     border: 3px solid white;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: background 0.2s;
 }
+.upload-badge:hover { background: #065F46; }
 
 .header-text h3 {
     color: #0b3a22;
@@ -317,6 +319,75 @@ body {
 .btn-delete:hover {
     background: #dc2626;
 }
+
+.btn-liberar {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 11px 24px;
+    background: #046C4E;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.btn-liberar:hover { background: #065F46; }
+
+.btn-cancelar-ed {
+    padding: 11px 24px;
+    background: #F3F4F6;
+    color: #374151;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.btn-cancelar-ed:hover { background: #E5E7EB; }
+
+/* Campos no modo visualização */
+.campo-readonly {
+    background: #F9FAFB !important;
+    color: #6B7280 !important;
+    cursor: default !important;
+    border-color: #E5E7EB !important;
+}
+.campo-readonly:focus { outline: none !important; box-shadow: none !important; }
+
+.cpf-paciente-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    border: 2px solid #E5E7EB;
+    border-radius: 10px;
+    background: #FAFCF9;
+    min-height: 42px;
+}
+
+.cpf-masked-value {
+    flex: 1;
+    font-size: 0.85rem;
+    color: #6B7280;
+    font-family: 'Poppins', sans-serif;
+    letter-spacing: 2px;
+}
+
+.btn-cpf-lock {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #046C4E;
+    display: flex;
+    align-items: center;
+    padding: 0;
+    transition: color 0.2s;
+}
+.btn-cpf-lock:hover { color: #065F46; }
 
 .form-footer {
     display: flex;

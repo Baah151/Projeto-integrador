@@ -1,6 +1,7 @@
 let consultasPaciente = [];
 let sessoesPaciente = [];
 let consultaPendenteSelecionada = null;
+let filtroMesAno = '';
 
 function gerenciarMenuMobile() {
   const openBtn = document.getElementById('open-menu-btn');
@@ -35,13 +36,24 @@ function statusLabel(status) {
   return map[status] || status;
 }
 
-function statusClass(status) {
+function chipBorderClass(status) {
   const map = {
-    'Agendado':  'aguardando',
-    'Pendente':  'pendente-ajuste',
-    'Confirmado': 'confirmado',
-    'Finalizado': 'finalizado',
-    'Cancelado':  'cancelado',
+    'Agendado':   'chip-aguardando',
+    'Pendente':   'chip-pendente-ajuste',
+    'Confirmado': 'chip-confirmado',
+    'Finalizado': 'chip-finalizado',
+    'Cancelado':  'chip-cancelado',
+  };
+  return map[status] || '';
+}
+
+function badgeClass(status) {
+  const map = {
+    'Agendado':   'badge-aguardando',
+    'Pendente':   'badge-pendente-ajuste',
+    'Confirmado': 'badge-confirmado',
+    'Finalizado': 'badge-finalizado',
+    'Cancelado':  'badge-cancelado',
   };
   return map[status] || '';
 }
@@ -125,49 +137,28 @@ function carregarNotificacoes() {
   }
 }
 
-function renderizarSessaoDetalhes(sessao, statusConsulta) {
-  if (statusConsulta !== 'Finalizado') return '';
-
+function buildSessaoDetailsHTML(sessao) {
   const partes = [];
-
-  if (sessao?.orientacoes_paciente) {
-    partes.push(`
-      <div class="sessao-detalhe-bloco">
-        <span class="sd-label">Orientações para você</span>
-        <p class="sd-texto">${sessao.orientacoes_paciente.replace(/\n/g, '<br>')}</p>
-      </div>`);
-  }
-  if (sessao?.prescricao_texto) {
-    partes.push(`
-      <div class="sessao-detalhe-bloco">
-        <span class="sd-label">Prescrição</span>
-        <p class="sd-texto">${sessao.prescricao_texto.replace(/\n/g, '<br>')}</p>
-      </div>`);
-  }
-  if (sessao?.medicamentos) {
-    partes.push(`
-      <div class="sessao-detalhe-bloco">
-        <span class="sd-label">Medicamentos / Suplementos</span>
-        <p class="sd-texto">${sessao.medicamentos.replace(/\n/g, '<br>')}</p>
-      </div>`);
-  }
-  if (sessao?.proxima_sessao_data) {
-    partes.push(`
-      <div class="sessao-detalhe-bloco proxima-sessao-info">
-        <span class="sd-label">Próxima Sessão Agendada</span>
-        <p class="sd-texto"><strong>${formatarDataBR(sessao.proxima_sessao_data)}</strong>${sessao.proxima_sessao_hora ? ` às ${formatarHorario(sessao.proxima_sessao_hora)}` : ''}</p>
-      </div>`);
-  }
-
-  if (partes.length === 0) {
-    partes.push(`
-      <div class="sessao-detalhe-bloco" style="color:#6B7280;">
-        <span class="sd-label">Informações clínicas</span>
-        <p class="sd-texto" style="color:#9CA3AF;font-style:italic;">Nenhuma orientação ou prescrição registrada pela profissional.</p>
-      </div>`);
-  }
-
-  return `<div class="sessao-detalhes-container">${partes.join('')}</div>`;
+  if (sessao?.orientacoes_paciente) partes.push(`
+    <div class="chip-detail-block">
+      <span class="chip-detail-label">Orientações para você</span>
+      <p class="chip-detail-text">${sessao.orientacoes_paciente.replace(/\n/g, '<br>')}</p>
+    </div>`);
+  if (sessao?.prescricao_texto) partes.push(`
+    <div class="chip-detail-block">
+      <span class="chip-detail-label">Prescrição</span>
+      <p class="chip-detail-text">${sessao.prescricao_texto.replace(/\n/g, '<br>')}</p>
+    </div>`);
+  if (sessao?.medicamentos) partes.push(`
+    <div class="chip-detail-block">
+      <span class="chip-detail-label">Medicamentos / Suplementos</span>
+      <p class="chip-detail-text">${sessao.medicamentos.replace(/\n/g, '<br>')}</p>
+    </div>`);
+  if (sessao?.proxima_sessao_data) partes.push(`
+    <div class="chip-proxima">
+      📅 Próxima sessão: <strong>${formatarDataBR(sessao.proxima_sessao_data)}</strong>${sessao.proxima_sessao_hora ? ` às ${formatarHorario(sessao.proxima_sessao_hora)}` : ''}
+    </div>`);
+  return partes.join('');
 }
 
 function carregarTelaConsultas() {
@@ -175,59 +166,107 @@ function carregarTelaConsultas() {
   if (!container) return;
   container.innerHTML = '';
 
-  const ativos = consultasPaciente.filter(c => c.status !== 'Cancelado');
+  let ativos = consultasPaciente.filter(c => c.status !== 'Cancelado');
+
+  if (filtroMesAno) {
+    ativos = ativos.filter(c => String(c.data_consulta).substring(0, 7) === filtroMesAno);
+  }
+
+  const resultadoEl = document.getElementById('filtro-resultado');
+  if (resultadoEl) {
+    resultadoEl.textContent = filtroMesAno
+      ? `${ativos.length} consulta${ativos.length !== 1 ? 's' : ''} encontrada${ativos.length !== 1 ? 's' : ''}`
+      : '';
+  }
 
   if (ativos.length === 0) {
-    container.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">📅</div>
-        <h2>Nenhuma consulta encontrada</h2>
-        <p>Você ainda não possui nenhum agendamento.</p>
-        <a href="../agendamento/index.html" class="btn-empty">Agendar Agora</a>
-      </div>`;
+    if (filtroMesAno) {
+      const [ano, mes] = filtroMesAno.split('-');
+      const nomeMes = new Date(Number(ano), Number(mes) - 1).toLocaleString('pt-BR', { month: 'long' });
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <h2>Nenhuma consulta em ${nomeMes} de ${ano}</h2>
+          <p>Tente selecionar outro mês ou limpe o filtro.</p>
+        </div>`;
+    } else {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">📅</div>
+          <h2>Nenhuma consulta encontrada</h2>
+          <p>Você ainda não possui nenhum agendamento.</p>
+          <a href="../agendamento/index.html" class="btn-empty">Agendar Agora</a>
+        </div>`;
+    }
     return;
   }
 
   ativos.forEach(c => {
     const sessao = c.status === 'Finalizado' ? getSessaoDaConsulta(c.id_agendamento) : null;
-    const detalhesHTML = renderizarSessaoDetalhes(sessao, c.status);
+    const sessaoDetailsInner = sessao ? buildSessaoDetailsHTML(sessao) : '';
+    const hasSessaoData = !!sessaoDetailsInner;
     const isPendente = c.status === 'Pendente';
 
-    const row = document.createElement('div');
-    row.classList.add('appointment-row');
-    if (detalhesHTML) row.classList.add('com-sessao');
-    if (isPendente) row.classList.add('row-pendente-ajuste');
+    const chip = document.createElement('div');
+    chip.classList.add('consulta-chip', chipBorderClass(c.status));
 
-    let pendenteBtn = '';
-    if (isPendente) {
-      pendenteBtn = `<button class="btn-ajuste-pendente">
-        <span class="material-symbols-outlined" style="font-size:16px;vertical-align:middle;">edit_note</span>
-        Responder
-      </button>`;
-    }
+    const sessaoNumHTML = sessao
+      ? `<span class="chip-sessao-num">Sessão #${sessao.numero_sessao || 1}</span>`
+      : '';
 
-    row.innerHTML = `
-      <div class="row-main">
-        <span>${formatarDataBR(c.data_consulta)}</span>
-        <span>${formatarHorario(c.horario)}</span>
-        <span style="font-weight:500;color:#1F2937;">${c.observacoes || '—'}</span>
-        <div>—</div>
-        <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;" title="${c.observacoes || ''}">${c.observacoes || 'Nenhuma'}</span>
-        <span class="status-text ${statusClass(c.status)}">${statusLabel(c.status)}</span>
-        ${sessao ? `<span style="font-size:0.72rem;color:#046C4E;font-weight:600;">Sessão #${sessao.numero_sessao || 1}</span>` : '<span></span>'}
+    const obsHTML = c.observacoes
+      ? `<p class="chip-obs-text">${c.observacoes}</p>`
+      : '';
+
+    const pendenteHTML = isPendente ? `
+      <div class="chip-pendente-box">
+        <strong>Ação necessária:</strong> ${c.motivo_pendencia || 'A profissional solicitou informações adicionais.'}
       </div>
-      ${isPendente ? `<div class="pendente-aviso">
-        <span class="material-symbols-outlined" style="font-size:18px;flex-shrink:0;">warning</span>
-        <span><strong>Ação necessária:</strong> ${c.motivo_pendencia || 'A profissional solicitou informações adicionais.'}</span>
-        ${pendenteBtn}
-      </div>` : ''}
-      ${detalhesHTML}`;
+      <button class="btn-chip-responder">
+        <span class="material-symbols-outlined">edit_note</span> Responder
+      </button>` : '';
 
-    if (isPendente) {
-      row.querySelector('.btn-ajuste-pendente')?.addEventListener('click', () => abrirModalPendente(c));
+    let expandHTML = '';
+    if (c.status === 'Finalizado') {
+      expandHTML = hasSessaoData
+        ? `<button class="chip-expand-btn">
+             <span class="material-symbols-outlined">expand_more</span>
+             Ver informações clínicas
+           </button>
+           <div class="chip-details">${sessaoDetailsInner}</div>`
+        : `<span class="chip-sem-dados">Nenhuma orientação registrada.</span>`;
     }
 
-    container.appendChild(row);
+    chip.innerHTML = `
+      <div class="chip-header">
+        <span class="chip-date">${formatarDataBR(c.data_consulta)}</span>
+        ${sessaoNumHTML}
+      </div>
+      <div class="chip-time">
+        <span class="material-symbols-outlined">schedule</span>
+        ${formatarHorario(c.horario)}
+      </div>
+      <span class="chip-status-badge ${badgeClass(c.status)}">${statusLabel(c.status)}</span>
+      ${obsHTML}
+      ${pendenteHTML}
+      ${expandHTML}`;
+
+    if (isPendente) {
+      chip.querySelector('.btn-chip-responder')?.addEventListener('click', () => abrirModalPendente(c));
+    }
+
+    if (hasSessaoData) {
+      const expandBtn = chip.querySelector('.chip-expand-btn');
+      const details = chip.querySelector('.chip-details');
+      expandBtn?.addEventListener('click', () => {
+        const aberto = details.classList.toggle('expanded');
+        expandBtn.innerHTML = aberto
+          ? '<span class="material-symbols-outlined">expand_less</span> Ocultar informações'
+          : '<span class="material-symbols-outlined">expand_more</span> Ver informações clínicas';
+      });
+    }
+
+    container.appendChild(chip);
   });
 }
 
@@ -248,6 +287,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   carregarTelaConsultas();
   carregarNotificacoes();
+
+  // Filtro por mês/ano
+  const filtroInput = document.getElementById('filtro-mes-ano');
+  const btnLimpar = document.getElementById('btn-limpar-filtro');
+
+  filtroInput?.addEventListener('change', () => {
+    filtroMesAno = filtroInput.value;
+    if (btnLimpar) btnLimpar.style.display = filtroMesAno ? 'flex' : 'none';
+    carregarTelaConsultas();
+  });
+
+  btnLimpar?.addEventListener('click', () => {
+    filtroMesAno = '';
+    if (filtroInput) filtroInput.value = '';
+    btnLimpar.style.display = 'none';
+    carregarTelaConsultas();
+  });
 
   // Modal de pendente
   document.getElementById('close-modal-pendente')?.addEventListener('click', fecharModalPendente);

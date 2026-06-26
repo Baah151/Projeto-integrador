@@ -52,12 +52,7 @@
                 <a href="../financeiro/index.html">
                     <span class="material-symbols-outlined">payments</span> Financeiro
                 </a>
-                <a href="../histórico/index.html" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <span class="material-symbols-outlined">history</span> Histórico
-                    </div>
-                    <span class="menu-badge" id="history-notif-badge" style="display: none;">0</span>
-                </a>
+
                 <a href="../perfil/index.html">
                     <span class="material-symbols-outlined">person</span> Perfil
                 </a>
@@ -95,18 +90,19 @@
                 <p>Caso precise reagendar ou cancelar o agendamento entre em contato com a clínica para alterar.</p>
             </div>
 
-            <section class="table-wrapper">
-                <div class="table-header">
-                    <span>Data</span>
-                    <span>Hora</span>
-                    <span>Serviço</span>
-                    <span>Documento</span>
-                    <span>Observações</span>
-                    <span>Status</span>
+            <div class="filtro-bar">
+                <div class="filtro-group">
+                    <span class="material-symbols-outlined filtro-icon">calendar_month</span>
+                    <input type="month" id="filtro-mes-ano" class="filtro-input" title="Filtrar por mês e ano">
                 </div>
-                <div id="appointments-container">
-                </div>
-            </section>
+                <button class="btn-limpar-filtro" id="btn-limpar-filtro" style="display:none;">
+                    <span class="material-symbols-outlined" style="font-size:16px;">close</span>
+                    Limpar
+                </button>
+                <span class="filtro-resultado" id="filtro-resultado"></span>
+            </div>
+
+            <div class="consultas-grid" id="appointments-container"></div>
         </main>
     </div>
 

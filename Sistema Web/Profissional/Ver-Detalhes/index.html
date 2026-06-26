@@ -29,7 +29,14 @@
                         </div>
                         <div class="patient-headline">
                             <h1 id="detalhe-nome-header">Carregando...</h1>
-                            <p id="detalhe-sub-registro">Idade: -- anos • Nasc: --/--/---- • CPF: ---.---.---.--</p>
+                            <p id="detalhe-sub-registro">Idade: -- anos • Nasc: --/--/----</p>
+                            <div class="cpf-prontuario-row">
+                                <span class="cpf-label">CPF:</span>
+                                <span class="cpf-masked-value" id="prontuario-cpf-display">•••.•••.•••-••</span>
+                                <button type="button" class="btn-cpf-lock" id="btn-reveal-cpf-prontuario" title="Visualizar CPF">
+                                    <span class="material-symbols-outlined" style="font-size:16px;">lock</span>
+                                </button>
+                            </div>
                             
                             <div class="contact-item" id="detalhe-item-telefone">
                                 <span class="material-symbols-outlined">call</span>
@@ -158,15 +165,9 @@
                                 <label>Nome Completo*</label>
                                 <input type="text" id="edit-nome" required>
                             </div>
-                            <div class="input-row-modal">
-                                <div class="input-group-modal">
-                                    <label>CPF*</label>
-                                    <input type="text" id="edit-cpf" maxlength="14" required>
-                                </div>
-                                <div class="input-group-modal">
-                                    <label>Data de Nascimento*</label>
-                                    <input type="date" id="edit-nascimento" required>
-                                </div>
+                            <div class="input-group-modal">
+                                <label>Data de Nascimento*</label>
+                                <input type="date" id="edit-nascimento" required>
                             </div>
                         </div>
 
@@ -306,6 +307,28 @@
             <div class="modal-alert-buttons">
                 <button type="button" class="btn-alert-cancel" id="btn-cancelar-exclusao">Cancelar</button>
                 <button type="button" class="btn-alert-danger" id="btn-concluir-exclusao">Finalizar Exclusão</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL VERIFICAR SENHA PARA VER CPF DO PACIENTE -->
+    <div class="modal-overlay" id="modal-cpf-prontuario">
+        <div class="modal-card-alert" style="max-width:380px;">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                <span class="material-symbols-outlined" style="font-size:28px;color:#046C4E;">shield_lock</span>
+                <h2 style="font-size:1rem;margin:0;">Confirmação de Identidade</h2>
+                <button id="btn-fechar-modal-cpf" style="background:none;border:none;cursor:pointer;color:#9CA3AF;margin-left:auto;display:flex;padding:2px;"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <p style="font-size:0.85rem;color:#6B7280;margin-bottom:16px;">Digite sua senha para visualizar o CPF deste paciente.</p>
+            <div style="position:relative;margin-bottom:16px;">
+                <input type="password" id="modal-cpf-senha" placeholder="Digite sua senha"
+                    style="width:100%;padding:11px 44px 11px 14px;border:2px solid #E5E7EB;border-radius:12px;font-family:'Poppins',sans-serif;font-size:0.875rem;outline:none;">
+                <span class="material-symbols-outlined" id="modal-cpf-eye"
+                    style="position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#9CA3AF;font-size:20px;">visibility</span>
+            </div>
+            <div class="modal-alert-buttons" style="justify-content:flex-end;">
+                <button type="button" class="btn-alert-cancel" id="btn-cancelar-modal-cpf">Cancelar</button>
+                <button type="button" class="btn-alert-submit" id="btn-confirmar-cpf-prontuario" style="background:#046C4E;">Confirmar</button>
             </div>
         </div>
     </div>
