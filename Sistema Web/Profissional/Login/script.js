@@ -1,47 +1,37 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const loginForm = document.getElementById('form-login-profissional');
-    const passwordInput = document.getElementById('password');
-    const eyeIcon = document.querySelector('.eye-icon');
+  const loginForm = document.getElementById('form-login-profissional');
+  const passwordInput = document.getElementById('password');
+  const eyeIcon = document.querySelector('.eye-icon');
 
-    if (eyeIcon && passwordInput) {
-        eyeIcon.addEventListener('click', function () {
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                this.textContent = 'visibility_off';
-            } else {
-                passwordInput.type = 'password';
-                this.textContent = 'visibility';
-            }
-        });
-    }
+  if (eyeIcon && passwordInput) {
+    eyeIcon.addEventListener('click', function () {
+      passwordInput.type = passwordInput.type === 'password' ? 'text' : 'password';
+      this.textContent = passwordInput.type === 'password' ? 'visibility' : 'visibility_off';
+    });
+  }
 
-    if (loginForm) {
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = passwordInput.value;
-            
-            const API_URL = 'http://localhost:8080/api/profissional/login';
-            
-            fetch(API_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email: email, senha: password })
-            })
-            .then(response => {
-                if (response.ok) {
-                    window.location.href = '../painel/index.html';
-                } else {
-                    alert('Credenciais incorretas. Verifique seu e-mail e senha.');
-                }
-            })
-            .catch(() => {
-                alert('Simulação: Login efetuado com sucesso no Painel Admin!');
-                window.location.href = '../painel/index.html';
-            });
-        });
-    }
+  if (loginForm) {
+    loginForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const btnLogin = loginForm.querySelector('button[type="submit"]');
+      const email = document.getElementById('email').value.trim();
+      const senha = passwordInput.value;
+
+      btnLogin.textContent = 'Entrando...';
+      btnLogin.disabled = true;
+
+      try {
+        const data = await apiRequest('POST', '/auth/login', { email, senha });
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('profissional', JSON.stringify(data.profissional));
+        showNotification('Login realizado com sucesso!');
+        setTimeout(() => { window.location.href = '../painel/index.html'; }, 600);
+      } catch (err) {
+        showNotification(err.message || 'Credenciais inválidas.', 'error');
+      } finally {
+        btnLogin.textContent = 'Entrar no Sistema';
+        btnLogin.disabled = false;
+      }
+    });
+  }
 });

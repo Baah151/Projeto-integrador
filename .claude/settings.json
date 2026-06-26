@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c//**)",
+      "Bash(curl -s -X POST http://localhost:3000/api/paciente/auth/register -H \"Content-Type: application/json\" -d \"{\\\\\"nome\\\\\":\\\\\"Ana Teste\\\\\",\\\\\"email\\\\\":\\\\\"ana@teste.com\\\\\",\\\\\"senha\\\\\":\\\\\"Ana@2025\\\\\",\\\\\"cpf\\\\\":\\\\\"000.000.000-00\\\\\",\\\\\"nascimento\\\\\":\\\\\"1990-01-01\\\\\",\\\\\"telefone\\\\\":\\\\\"\\(11\\) 99999-0000\\\\\"}\")",
+      "Bash(curl -s -X POST http://localhost:3000/api/paciente/auth/login -H \"Content-Type: application/json\" -d \"{\\\\\"email\\\\\":\\\\\"ana@teste.com\\\\\",\\\\\"senha\\\\\":\\\\\"Ana@2025\\\\\"}\")",
+      "PowerShell(Invoke-RestMethod -Uri \"http://localhost:3000/api/health\" -Method GET)",
+      "PowerShell($body = @{ email = \"luana@email.com\"; senha = \"Luana@2025\" } | ConvertTo-Json; $response = Invoke-RestMethod -Uri \"http://localhost:3000/api/auth/login\" -Method POST -Body $body -ContentType \"application/json\"; $token = $response.data.token; $headers = @{ Authorization = \"Bearer $token\" }; $sessoes = Invoke-RestMethod -Uri \"http://localhost:3000/api/sessao\" -Method GET -Headers $headers; \"Status sessoes: OK - $\\($sessoes.success\\)\")",
+      "PowerShell(Start-Sleep -Seconds 5; try { $r = Invoke-WebRequest -Uri \"http://localhost:3000/api/health\" -TimeoutSec 6 -ErrorAction Stop; \"Status: $\\($r.StatusCode\\) — $\\($r.Content\\)\" } catch { \"Ainda aguardando: $_\" })",
+      "PowerShell($r = Invoke-WebRequest -Uri \"http://localhost:3000/api/health\" -TimeoutSec 8 -ErrorAction SilentlyContinue; if \\($r\\) { \"OK $\\($r.StatusCode\\): $\\($r.Content\\)\" } else { \"Sem resposta\" })",
+      "Bash(curl -s http://localhost:3000/api/health)"
+    ]
+  }
+}

@@ -164,7 +164,9 @@
                 </div>
                 <div class="detail-item full-width">
                     <label>Documentação Anexada:</label>
-                    <span id="detalhe-documento"></span>
+                    <div id="detalhe-documento" style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+                        <small style="color:#9CA3AF;">Carregando...</small>
+                    </div>
                 </div>
                 <div class="detail-item full-width">
                     <label>Observações do Paciente:</label>
@@ -216,6 +218,7 @@
 
     <div class="menu-overlay-backdrop" id="menu-backdrop"></div>
 
+    <script src="../assets/api.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

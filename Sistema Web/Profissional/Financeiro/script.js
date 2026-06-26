@@ -1,168 +1,147 @@
 function gerenciarMenuMobile() {
-    const openBtn = document.getElementById('open-menu-btn');
-    const closeBtn = document.getElementById('close-menu-btn');
-    const sidebar = document.getElementById('mobile-sidebar');
-    const backdrop = document.getElementById('menu-backdrop');
-
-    if (!openBtn || !sidebar || !backdrop) return;
-
-    openBtn.addEventListener('click', () => {
-        sidebar.classList.add('open');
-        backdrop.classList.add('active');
-    });
-
-    const fecharMenu = () => {
-        sidebar.classList.remove('open');
-        backdrop.classList.remove('active');
-    };
-
-    if (closeBtn) closeBtn.addEventListener('click', fecharMenu);
-    backdrop.addEventListener('click', fecharMenu);
+  const openBtn = document.getElementById('open-menu-btn');
+  const closeBtn = document.getElementById('close-menu-btn');
+  const sidebar = document.getElementById('mobile-sidebar');
+  const backdrop = document.getElementById('menu-backdrop');
+  if (!openBtn || !sidebar || !backdrop) return;
+  openBtn.addEventListener('click', () => { sidebar.classList.add('open'); backdrop.classList.add('active'); });
+  const fechar = () => { sidebar.classList.remove('open'); backdrop.classList.remove('active'); };
+  if (closeBtn) closeBtn.addEventListener('click', fechar);
+  backdrop.addEventListener('click', fechar);
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    gerenciarMenuMobile();
+function formatarBRL(valor) {
+  return `R$ ${parseFloat(valor || 0).toFixed(2).replace('.', ',')}`;
+}
 
-    const filterMes = document.getElementById('filter-mes');
-    const btnExportar = document.getElementById('btn-exportar');
+function formatarDataBR(dataString) {
+  if (!dataString) return '--/--/----';
+  const p = String(dataString).substring(0, 10).split('-');
+  return `${p[2]}/${p[1]}/${p[0]}`;
+}
 
-    const txtFaturamento = document.getElementById('total-faturamento');
-    const txtMediaPaciente = document.getElementById('media-paciente');
-    const txtSessoes = document.getElementById('total-sessoes');
+let sessoesLista = [];
 
-    const financeEmpty = document.getElementById('finance-empty');
-    const tableWrapper = document.getElementById('finance-table-wrapper');
-    const rowsContainer = document.getElementById('finance-rows');
+function badgeStatus(s) {
+  if (s.status_pagamento === 'Pago') return '<span class="badge-pago">Pago</span>';
+  if (s.pago_apos_sessao) return '<span class="badge-apos">Pós-Sessão</span>';
+  return '<span class="badge-pendente-fin">Pendente</span>';
+}
 
-    const bellButton = document.getElementById('bell-button');
-    const notiDropdown = document.getElementById('noti-dropdown');
-    const dropdownBody = document.getElementById('dropdown-body');
+function rowClass(s) {
+  if (s.status_pagamento === 'Pago') return 'row-pago';
+  if (s.pago_apos_sessao) return 'row-apos';
+  return 'row-pendente';
+}
 
-    if (bellButton) {
-        bellButton.addEventListener('click', function(e) {
-            e.stopPropagation();
-            if (notiDropdown) notiDropdown.classList.toggle('show');
-        });
-    }
+function renderizarSessoes(lista) {
+  const tbody = document.getElementById('finance-rows');
+  const empty = document.getElementById('finance-empty');
+  const wrapper = document.getElementById('finance-table-wrapper');
+  if (!tbody) return;
 
-    document.addEventListener('click', function() {
-        if (notiDropdown) {
-            notiDropdown.classList.remove('show');
+  tbody.innerHTML = '';
+  if (!lista || lista.length === 0) {
+    if (wrapper) wrapper.style.display = 'none';
+    if (empty) empty.style.display = 'flex';
+    return;
+  }
+  if (wrapper) wrapper.style.display = 'block';
+  if (empty) empty.style.display = 'none';
+
+  lista.forEach(s => {
+    const pago = s.status_pagamento === 'Pago';
+    const tr = document.createElement('tr');
+    tr.className = rowClass(s);
+    tr.innerHTML = `
+      <td><strong>${s.nome_paciente || '--'}</strong></td>
+      <td>${formatarDataBR(s.data_sessao)}</td>
+      <td style="text-align:center;font-weight:600;">#${s.numero_sessao || 1}</td>
+      <td style="font-weight:700;color:#046C4E;">${formatarBRL(s.valor_sessao)}</td>
+      <td style="color:#6B7280;font-size:0.82rem;">${s.forma_pagamento || '—'}</td>
+      <td style="text-align:center;">${badgeStatus(s)}</td>
+      <td style="text-align:center;">
+        ${!pago ? `<button class="btn-confirmar-pag" data-id="${s.id_sessao}">Confirmar Pag.</button>` : '<span style="font-size:0.72rem;color:#10B981;font-weight:700;">✓ Pago</span>'}
+      </td>
+    `;
+    if (!pago) {
+      tr.querySelector('.btn-confirmar-pag').addEventListener('click', async (ev) => {
+        const btn = ev.currentTarget;
+        btn.disabled = true;
+        try {
+          await confirmarPagamentoSessao(s.id_sessao, { forma_pagamento: s.forma_pagamento });
+          s.status_pagamento = 'Pago';
+          s.pago_na_sessao = true;
+          renderizarSessoes(sessoesLista);
+          atualizarDashboard();
+          showNotification('Pagamento confirmado!');
+        } catch (err) {
+          showNotification(err.message || 'Erro ao confirmar pagamento.', 'error');
+          btn.disabled = false;
         }
-    });
-
-    let sessoesFinalizadasMassa = [];
-
-    function formatarDataBR(dataString) {
-        if (!dataString) return "--/--/----";
-        const partes = dataString.split('-');
-        return `${partes[2]}/${partes[1]}/${partes[0]}`;
+      });
     }
+    tbody.appendChild(tr);
+  });
+}
 
-    function processarFinanceiro() {
-        if (!rowsContainer || !filterMes) return;
-        rowsContainer.innerHTML = '';
-        const mesSelecionado = filterMes.value;
+function atualizarDashboard() {
+  const pago = sessoesLista.filter(s => s.status_pagamento === 'Pago');
+  const apos = sessoesLista.filter(s => s.status_pagamento !== 'Pago' && s.pago_apos_sessao);
+  const pendente = sessoesLista.filter(s => s.status_pagamento !== 'Pago' && !s.pago_apos_sessao);
 
-        const filtradas = sessoesFinalizadasMassa.filter(s => s.data && s.data.startsWith(mesSelecionado));
+  const somaBRL = (arr) => arr.reduce((acc, s) => acc + parseFloat(s.valor_sessao || 0), 0);
+  const el = (id) => document.getElementById(id);
 
-        if (filtradas.length === 0) {
-            if (tableWrapper) tableWrapper.style.display = 'none';
-            if (financeEmpty) financeEmpty.style.display = 'block';
-            
-            if (txtFaturamento) txtFaturamento.textContent = "R$ 0,00";
-            if (txtMediaPaciente) txtMediaPaciente.textContent = "R$ 0,00";
-            if (txtSessoes) txtSessoes.textContent = "0";
-            return;
-        }
+  if (el('total-pago')) el('total-pago').textContent = formatarBRL(somaBRL(pago));
+  if (el('cnt-pago')) el('cnt-pago').textContent = `${pago.length} sessão(ões)`;
+  if (el('total-apos')) el('total-apos').textContent = formatarBRL(somaBRL(apos));
+  if (el('cnt-apos')) el('cnt-apos').textContent = `${apos.length} sessão(ões)`;
+  if (el('total-pendente')) el('total-pendente').textContent = formatarBRL(somaBRL(pendente));
+  if (el('cnt-pendente')) el('cnt-pendente').textContent = `${pendente.length} sessão(ões)`;
+  if (el('total-faturamento')) el('total-faturamento').textContent = formatarBRL(somaBRL(sessoesLista));
+  if (el('total-sessoes')) el('total-sessoes').textContent = `${sessoesLista.length} sessão(ões)`;
+}
 
-        if (financeEmpty) financeEmpty.style.display = 'none';
-        if (tableWrapper) tableWrapper.style.display = 'block';
+window.addEventListener('DOMContentLoaded', async () => {
+  if (!verificarAutenticacao()) return;
+  gerenciarMenuMobile();
 
-        let faturamentoTotal = 0;
-        let pacientesDoMes = new Set();
+  const dropdownBody = document.getElementById('dropdown-body');
+  if (dropdownBody) dropdownBody.innerHTML = '<div class="dropdown-item" style="text-align:center;color:#9ca3af;">Nenhuma notificação.</div>';
 
-        filtradas.forEach(s => {
-            faturamentoTotal += parseFloat(s.valor || 0);
-            if (s.pacienteId) {
-                pacientesDoMes.add(s.pacienteId);
-            }
-        });
+  const bell = document.getElementById('bell-button');
+  const notiDropdown = document.getElementById('noti-dropdown');
+  if (bell && notiDropdown) {
+    bell.addEventListener('click', (e) => { e.stopPropagation(); notiDropdown.classList.toggle('show'); });
+    document.addEventListener('click', () => notiDropdown.classList.remove('show'));
+  }
 
-        const qtdPacientesUnicos = pacientesDoMes.size > 0 ? pacientesDoMes.size : 1;
-        let mediaPorPaciente = faturamentoTotal / qtdPacientesUnicos;
+  const filterMes = document.getElementById('filter-mes');
+  if (filterMes) {
+    const hoje = new Date();
+    filterMes.value = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
+  }
 
-        if (txtFaturamento) txtFaturamento.textContent = `R$ ${faturamentoTotal.toFixed(2).replace('.', ',')}`;
-        if (txtMediaPaciente) txtMediaPaciente.textContent = `R$ ${mediaPorPaciente.toFixed(2).replace('.', ',')}`;
-        if (txtSessoes) txtSessoes.textContent = filtradas.length;
-
-        let caixaDiarioMap = {};
-
-        filtradas.forEach(s => {
-            if (s.data) {
-                if (!caixaDiarioMap[s.data]) {
-                    caixaDiarioMap[s.data] = { atendimentos: 0, totalValor: 0 };
-                }
-                caixaDiarioMap[s.data].atendimentos++;
-                caixaDiarioMap[s.data].totalValor += parseFloat(s.valor || 0);
-            }
-        });
-
-        const chavesDiasOrdenados = Object.keys(caixaDiarioMap).sort((a, b) => b.localeCompare(a));
-
-        let maiorValorDia = -1;
-        let menorValorDia = Infinity;
-
-        chavesDiasOrdenados.forEach(d => {
-            const val = caixaDiarioMap[d].totalValor;
-            if (val > maiorValorDia) maiorValorDia = val;
-            if (val < menorValorDia) menorValorDia = val;
-        });
-
-        chavesDiasOrdenados.forEach(dia => {
-            const dadosDia = caixaDiarioMap[dia];
-            const tr = document.createElement('tr');
-
-            let badgeHTML = '';
-            
-            if (dadosDia.totalValor === maiorValorDia && maiorValorDia !== menorValorDia) {
-                badgeHTML = `<span class="badge-finance maior">Maior</span>`;
-            } else if (dadosDia.totalValor === menorValorDia && maiorValorDia !== menorValorDia) {
-                badgeHTML = `<span class="badge-finance menor">Menor</span>`;
-            }
-
-            tr.innerHTML = `
-                <td><strong>${formatarDataBR(dia)}</strong></td>
-                <td>${dadosDia.atendimentos} sessões finalizadas</td>
-                <td><strong>R$ ${dadosDia.totalValor.toFixed(2).replace('.', ',')}</strong></td>
-                <td style="text-align: right;">${badgeHTML}</td>
-            `;
-
-            rowsContainer.appendChild(tr);
-        });
+  async function carregarSessoes() {
+    try {
+      const params = {};
+      if (filterMes && filterMes.value) params.mes = filterMes.value;
+      sessoesLista = await listarSessoesProfissional(params);
+      renderizarSessoes(sessoesLista);
+      atualizarDashboard();
+    } catch (err) {
+      showNotification(err.message || 'Erro ao carregar sessões.', 'error');
     }
+  }
 
-    if (btnExportar) {
-        btnExportar.addEventListener('click', () => {
-            const t = new Date();
-            const dataFormatada = `${String(t.getDate()).padStart(2, '0')}/${String(t.getMonth() + 1).padStart(2, '0')}/${t.getFullYear()}`;
-            const printTxt = document.getElementById('print-data-txt');
-            const mesVal = filterMes ? filterMes.value : '--';
-            if (printTxt) printTxt.textContent = `Relatório de Performance de Fluxo emitido em: ${dataFormatada} | Competência: ${mesVal}`;
-            window.print();
-        });
-    }
+  await carregarSessoes();
 
-    if (filterMes) {
-        filterMes.addEventListener('change', processarFinanceiro);
-    }
+  if (filterMes) filterMes.addEventListener('change', carregarSessoes);
 
-    function inicializarPainel() {
-        if (dropdownBody) {
-            dropdownBody.innerHTML = '<div class="dropdown-item" style="text-align:center; color:#9ca3af;">Nenhuma notificação por enquanto.</div>';
-        }
-        processarFinanceiro();
-    }
-
-    inicializarPainel();
+  document.getElementById('btn-exportar')?.addEventListener('click', () => {
+    const printTxt = document.getElementById('print-data-txt');
+    if (printTxt) printTxt.textContent = `Emitido em: ${new Date().toLocaleDateString('pt-BR')}`;
+    window.print();
+  });
 });

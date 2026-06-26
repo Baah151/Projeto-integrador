@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Sessão | Luana Damazio</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+</head>
+<body>
+
+<div class="page-wrapper">
+
+    <!-- HEADER -->
+    <header class="top-bar">
+        <button class="btn-back" id="btn-voltar">
+            <span class="material-symbols-outlined">arrow_back</span>
+            Voltar para Agendados
+        </button>
+        <h1 class="top-title">Registrar Sessão</h1>
+        <div style="width:160px;"></div>
+    </header>
+
+    <!-- INFO DO PACIENTE -->
+    <div class="paciente-card" id="paciente-info-card">
+        <div class="paciente-avatar">
+            <span class="material-symbols-outlined">person</span>
+        </div>
+        <div>
+            <p class="paciente-nome" id="info-nome">Carregando...</p>
+            <p class="paciente-meta" id="info-meta">—</p>
+        </div>
+        <span class="sessao-badge" id="info-sessao-num">Sessão #—</span>
+    </div>
+
+    <!-- FORMULÁRIO PRINCIPAL -->
+    <form id="form-sessao" class="form-grid" autocomplete="off">
+
+        <!-- COLUNA ESQUERDA -->
+        <div class="col">
+
+            <!-- DESCRIÇÃO DO ATENDIMENTO -->
+            <div class="card-section">
+                <h2 class="section-title">
+                    <span class="material-symbols-outlined">medical_information</span>
+                    Atendimento
+                </h2>
+
+                <div class="field-group">
+                    <label>Descrição do que foi realizado na sessão</label>
+                    <textarea id="descricao_realizada" rows="5" placeholder="Descreva os procedimentos realizados, técnicas aplicadas, evolução do paciente..."></textarea>
+                </div>
+
+                <div class="field-group">
+                    <label>Orientações para o Paciente <span class="label-hint">(visível ao paciente)</span></label>
+                    <textarea id="orientacoes_paciente" rows="3" placeholder="Ex: Manter repouso, evitar esforço, aplicar compressas..."></textarea>
+                </div>
+
+                <div class="field-group">
+                    <label>Observações Internas <span class="label-hint">(apenas Luana vê)</span></label>
+                    <textarea id="observacoes_internas" rows="3" placeholder="Notas de evolução, intercorrências, observações clínicas internas..."></textarea>
+                </div>
+            </div>
+
+            <!-- PRESCRIÇÃO -->
+            <div class="card-section">
+                <h2 class="section-title">
+                    <span class="material-symbols-outlined">prescription</span>
+                    Prescrição
+                </h2>
+
+                <div class="field-group">
+                    <label>Texto da Prescrição</label>
+                    <textarea id="prescricao_texto" rows="4" placeholder="Ex: Exercícios domiciliares: 3 séries de 15 repetições de..."></textarea>
+                </div>
+
+                <div class="field-group">
+                    <label>Medicamentos / Suplementos</label>
+                    <textarea id="medicamentos" rows="2" placeholder="Ex: Ibuprofeno 400mg 1cp 12/12h por 5 dias se dor"></textarea>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- COLUNA DIREITA -->
+        <div class="col">
+
+            <!-- REAGENDAMENTO -->
+            <div class="card-section">
+                <h2 class="section-title">
+                    <span class="material-symbols-outlined">event_repeat</span>
+                    Reagendar Próxima Sessão
+                </h2>
+
+                <div class="reagendar-toggle-row">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="reagendar-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">Agendar próxima sessão para este paciente</span>
+                </div>
+
+                <div id="reagendar-panel" class="reagendar-panel" style="display:none;">
+
+                    <!-- Layout: calendário + slots lado a lado -->
+                    <div class="reagendar-grid">
+                        <div class="field-group">
+                            <label>Data</label>
+                            <input type="date" id="reagendar_data" class="reagendar-date-input">
+                        </div>
+                        <div class="reagendar-slots-col">
+                            <label class="slots-col-label">Horários disponíveis</label>
+                            <div id="reagendar-slots-container" class="reagendar-slots-container">
+                                <p class="slots-hint">Selecione uma data</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input oculto que guarda o horário selecionado -->
+                    <input type="hidden" id="reagendar_hora">
+
+                    <div id="reagendar-preview" class="reagendar-preview" style="display:none;">
+                        <span class="material-symbols-outlined">check_circle</span>
+                        <span id="reagendar-preview-texto"></span>
+                    </div>
+
+                    <div class="reagendar-separator"><span>atalho</span></div>
+
+                    <button type="button" id="btn-proxima-semana" class="btn-quick-reagendar">
+                        <span class="material-symbols-outlined">fast_forward</span>
+                        1 semana depois — mesmo horário
+                    </button>
+
+                </div>
+            </div>
+
+            <!-- FINANCEIRO -->
+            <div class="card-section">
+                <h2 class="section-title">
+                    <span class="material-symbols-outlined">payments</span>
+                    Financeiro
+                </h2>
+
+                <div class="field-row">
+                    <div class="field-group">
+                        <label>Valor da Sessão (R$)*</label>
+                        <input type="number" id="valor_sessao" min="0" step="0.01" placeholder="Ex: 120.00" required>
+                    </div>
+                    <div class="field-group">
+                        <label>Forma de Pagamento</label>
+                        <select id="forma_pagamento">
+                            <option value="">Selecione...</option>
+                            <option value="PIX">PIX</option>
+                            <option value="Dinheiro">Dinheiro</option>
+                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                            <option value="Cartão de Débito">Cartão de Débito</option>
+                            <option value="Boleto">Boleto</option>
+                            <option value="Transferência">Transferência</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="field-group">
+                    <label>Status do Pagamento</label>
+                    <div class="payment-options">
+                        <label class="pay-option green">
+                            <input type="radio" name="pagamento_status" value="pago" id="pag_pago">
+                            <span class="pay-icon material-symbols-outlined">check_circle</span>
+                            <span class="pay-label">Pagou agora</span>
+                            <span class="pay-sub">PIX / Dinheiro / Cartão</span>
+                        </label>
+                        <label class="pay-option yellow">
+                            <input type="radio" name="pagamento_status" value="apos" id="pag_apos">
+                            <span class="pay-icon material-symbols-outlined">schedule</span>
+                            <span class="pay-label">Paga após sessão</span>
+                            <span class="pay-sub">Combinado para depois</span>
+                        </label>
+                        <label class="pay-option red">
+                            <input type="radio" name="pagamento_status" value="pendente" id="pag_pendente" checked>
+                            <span class="pay-icon material-symbols-outlined">pending</span>
+                            <span class="pay-label">Pendente</span>
+                            <span class="pay-sub">A confirmar pagamento</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BOTÕES -->
+            <div class="actions-bar">
+                <button type="button" class="btn-cancel" id="btn-cancelar-form">Cancelar</button>
+                <button type="submit" class="btn-submit" id="btn-salvar">
+                    <span class="material-symbols-outlined">save</span>
+                    Registrar Sessão
+                </button>
+            </div>
+
+        </div>
+
+    </form>
+
+</div>
+
+<script src="../assets/api.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

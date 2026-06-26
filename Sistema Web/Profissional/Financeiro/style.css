@@ -196,9 +196,9 @@ body {
 
 .finance-metrics {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 20px;
-    margin-bottom: 30px;
+    margin-bottom: 24px;
 }
 
 .metric-card {
@@ -218,9 +218,92 @@ body {
 
 .metric-card h3 {
     color: #046C4E;
-    font-size: 2.1rem;
+    font-size: 1.8rem;
     font-weight: 700;
 }
+
+.metric-card small {
+    font-size: 0.72rem;
+    color: #9CA3AF;
+    font-weight: 500;
+    display: block;
+    margin-top: 4px;
+}
+
+.metric-green { border-left: 4px solid #10B981; }
+.metric-green h3 { color: #065F46; }
+
+.metric-yellow { border-left: 4px solid #F59E0B; }
+.metric-yellow h3 { color: #92400E; }
+
+.metric-red { border-left: 4px solid #EF4444; }
+.metric-red h3 { color: #991B1B; }
+
+/* Legenda de cores */
+.legenda-pagamento {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+.leg-item {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+}
+.leg-verde { background: #D1FAE5; color: #065F46; }
+.leg-amarelo { background: #FEF3C7; color: #92400E; }
+.leg-vermelho { background: #FEE2E2; color: #991B1B; }
+
+/* Badges de status na tabela */
+.badge-pago {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: #D1FAE5;
+    color: #065F46;
+}
+.badge-apos {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: #FEF3C7;
+    color: #92400E;
+}
+.badge-pendente-fin {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: #FEE2E2;
+    color: #991B1B;
+}
+
+/* Linha colorida na tabela */
+tr.row-pago { background: #F0FDF4; }
+tr.row-apos { background: #FFFBEB; }
+tr.row-pendente { background: #FEF2F2; }
+
+.btn-confirmar-pag {
+    padding: 5px 12px;
+    background: #10B981;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: background 0.2s;
+}
+.btn-confirmar-pag:hover { background: #059669; }
+.btn-confirmar-pag:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .actions-row {
     display: flex;
@@ -361,7 +444,13 @@ body {
     }
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 1100px) {
+    .finance-metrics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
     .finance-metrics {
         grid-template-columns: 1fr;
     }

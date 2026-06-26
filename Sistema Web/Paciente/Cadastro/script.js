@@ -240,19 +240,19 @@ if (cepInput) {
 
 const btnFinalizar = document.getElementById('btn-finalizar-cadastro');
 if (btnFinalizar) {
-    btnFinalizar.addEventListener('click', () => {
+    btnFinalizar.addEventListener('click', async () => {
         const senha = document.getElementById('senha').value;
         const confirmarSenha = document.getElementById('confirmar-senha').value;
         const cep = document.getElementById('cep').value.replace(/\D/g, '');
 
         if (senha !== confirmarSenha) {
-            alert('As senhas não coincidem!');
+            showNotification('As senhas não coincidem!', 'error');
             document.getElementById('confirmar-senha').style.borderColor = '#EF4444';
             return;
         }
 
         if (cep.length !== 8) {
-            alert('O CEP precisa conter exatamente 8 números.');
+            showNotification('O CEP precisa conter exatamente 8 números.', 'error');
             document.getElementById('cep').style.borderColor = '#EF4444';
             return;
         }
@@ -268,19 +268,27 @@ if (btnFinalizar) {
         });
 
         if (!stepValid) {
-            alert('Por favor, preencha todos os campos obrigatórios do endereço.');
+            showNotification('Preencha todos os campos obrigatórios do endereço.', 'error');
             return;
         }
 
-        if (!document.getElementById('termos').checked) {
-            alert('Você precisa aceitar os Termos de Uso e Privacidade para continuar.');
+        const termosEl = document.getElementById('termos');
+        if (termosEl && !termosEl.checked) {
+            showNotification('Aceite os Termos de Uso e Privacidade para continuar.', 'error');
             return;
         }
+
+        // Converter DD/MM/YYYY → YYYY-MM-DD
+        const nascimentoRaw = document.getElementById('nascimento').value;
+        const partes = nascimentoRaw.replace(/\D/g, '');
+        const nascimentoISO = partes.length === 8
+            ? `${partes.substring(4,8)}-${partes.substring(2,4)}-${partes.substring(0,2)}`
+            : nascimentoRaw;
 
         const dadosPaciente = {
             nome: document.getElementById('nome').value,
             cpf: document.getElementById('cpf').value.replace(/\D/g, ''),
-            dataNascimento: document.getElementById('nascimento').value,
+            nascimento: nascimentoISO,
             email: document.getElementById('email').value,
             telefone: document.getElementById('telefone').value.replace(/\D/g, ''),
             senha: senha,
@@ -293,29 +301,21 @@ if (btnFinalizar) {
             estado: document.getElementById('estado').value
         };
 
-        const API_URL = 'http://localhost:8080/api/pacientes';
+        btnFinalizar.textContent = 'Cadastrando...';
+        btnFinalizar.disabled = true;
 
-        fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dadosPaciente)
-        })
-        .then(response => {
-            if (response.ok) {
-                campos.forEach(id => localStorage.removeItem(`rascunho_${id}`));
-                localStorage.removeItem('cadastro_etapa_atual');
-                alert('Cadastro realizado com sucesso!');
-                window.location.href = '../login/index.html';
-            } else {
-                alert('Erro ao realizar o cadastro no servidor.');
-            }
-        })
-        .catch(() => {
-            localStorage.setItem('dadosCadastroPaciente', JSON.stringify(dadosPaciente));
+        try {
+            const data = await cadastrarPaciente(dadosPaciente);
+            localStorage.setItem('paciente_token', data.token);
+            localStorage.setItem('paciente', JSON.stringify(data.paciente));
             campos.forEach(id => localStorage.removeItem(`rascunho_${id}`));
             localStorage.removeItem('cadastro_etapa_atual');
-            alert('Servidor fora do ar! Dados salvos localmente para simulação.');
-            window.location.href = '../login/index.html';
-        });
+            showNotification('Cadastro realizado com sucesso!');
+            setTimeout(() => { window.location.href = '../agendamento/index.html'; }, 800);
+        } catch (err) {
+            showNotification(err.message || 'Erro ao realizar cadastro.', 'error');
+            btnFinalizar.textContent = 'Finalizar Cadastro';
+            btnFinalizar.disabled = false;
+        }
     });
 }

@@ -128,25 +128,23 @@
                     </div>
 
                     <div class="input-group">
-                        <label>3. Digite o Horário</label>
-                        <input type="time" id="time-input">
+                        <label>3. Selecione os Horários Disponíveis</label>
+                        <div class="time-slots-grid" id="time-slots-grid">
+                        </div>
+                        <p class="label-mini" id="slots-hint" style="margin-top:10px;">Selecione uma data para ver os horários.</p>
                     </div>
 
                     <div class="input-group">
-                        <label>4. Capacidade de Pacientes (Vagas)</label>
-                        <div class="add-time-row">
-                            <input type="number" id="vagas-input" min="1" max="10" value="1" placeholder="Ex: 3">
-                            <button class="btn-add" id="btn-adicionar">+ Adicionar Horário</button>
-                        </div>
+                        <label>4. Vagas por Horário</label>
+                        <input type="number" id="vagas-input" min="1" max="20" value="1">
                     </div>
 
-                    <div class="temp-time-list">
-                        <p class="label-mini">Horários selecionados para este dia:</p>
-                        <div class="chips-container" id="chips-container">
-                        </div>
+                    <div class="selected-preview" id="selected-preview" style="display:none;">
+                        <span class="material-symbols-outlined" style="font-size:16px;color:#046C4E;">check_circle</span>
+                        <span id="count-selected">0</span> horário(s) selecionado(s)
                     </div>
 
-                    <button class="btn-save-agenda" id="btn-liberar">Liberar Dia na Agenda</button>
+                    <button class="btn-save-agenda" id="btn-liberar">Liberar Horários na Agenda</button>
                 </section>
 
                 <section class="summary-card">
@@ -162,6 +160,7 @@
 
     <div class="menu-overlay-backdrop" id="menu-backdrop"></div>
 
+    <script src="../assets/api.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

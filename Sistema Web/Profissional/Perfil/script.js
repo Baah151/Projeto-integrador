@@ -1,147 +1,99 @@
 function gerenciarMenuMobile() {
-    const openBtn = document.getElementById('open-menu-btn');
-    const closeBtn = document.getElementById('close-menu-btn');
-    const sidebar = document.getElementById('mobile-sidebar');
-    const backdrop = document.getElementById('menu-backdrop');
-
-    if (!openBtn || !sidebar || !backdrop) return;
-
-    openBtn.addEventListener('click', () => {
-        sidebar.classList.add('open');
-        backdrop.classList.add('active');
-    });
-
-    const fecharMenu = () => {
-        sidebar.classList.remove('open');
-        backdrop.classList.remove('active');
-    };
-
-    if (closeBtn) closeBtn.addEventListener('click', fecharMenu);
-    backdrop.addEventListener('click', fecharMenu);
+  const openBtn = document.getElementById('open-menu-btn');
+  const closeBtn = document.getElementById('close-menu-btn');
+  const sidebar = document.getElementById('mobile-sidebar');
+  const backdrop = document.getElementById('menu-backdrop');
+  if (!openBtn || !sidebar || !backdrop) return;
+  openBtn.addEventListener('click', () => { sidebar.classList.add('open'); backdrop.classList.add('active'); });
+  const fechar = () => { sidebar.classList.remove('open'); backdrop.classList.remove('active'); };
+  if (closeBtn) closeBtn.addEventListener('click', fechar);
+  backdrop.addEventListener('click', fechar);
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    gerenciarMenuMobile();
+function popularFormulario(p) {
+  const campos = ['nome', 'email', 'telefone', 'cpf', 'nascimento', 'cep', 'logradouro', 'numero', 'bairro', 'complemento', 'cidade', 'estado', 'especialidade', 'registro'];
+  campos.forEach(c => {
+    const el = document.getElementById(`perfil-${c}`) || document.getElementById(c);
+    if (el) el.value = p[c] || '';
+  });
+  const nomeHeader = document.getElementById('perfil-nome-header') || document.getElementById('nome-header');
+  if (nomeHeader) nomeHeader.textContent = p.nome || '--';
+  const emailHeader = document.getElementById('perfil-email-header') || document.getElementById('email-header');
+  if (emailHeader) emailHeader.textContent = p.email || '--';
+}
 
-    const formDadosSeguranca = document.getElementById('form-dados-seguranca');
-    const formEndereco = document.getElementById('form-endereco');
+window.addEventListener('DOMContentLoaded', async () => {
+  if (!verificarAutenticacao()) return;
+  gerenciarMenuMobile();
 
-    const emailInput = document.getElementById('email');
-    const telefoneInput = document.getElementById('telefone');
+  const dropdownBody = document.getElementById('dropdown-body');
+  if (dropdownBody) dropdownBody.innerHTML = '<div class="dropdown-item" style="text-align:center;color:#9ca3af;">Nenhuma notificação.</div>';
 
-    const cepInput = document.getElementById('cep');
-    const ruaInput = document.getElementById('rua');
-    const bairroInput = document.getElementById('bairro');
-    const cidadeInput = document.getElementById('cidade');
-    const ufInput = document.getElementById('uf');
+  const bell = document.getElementById('bell-button');
+  const notiDropdown = document.getElementById('noti-dropdown');
+  if (bell && notiDropdown) {
+    bell.addEventListener('click', (e) => { e.stopPropagation(); notiDropdown.classList.toggle('show'); });
+    document.addEventListener('click', () => notiDropdown.classList.remove('show'));
+  }
 
-    const senhaAtual = document.getElementById('senha-atual');
-    const novaSenha = document.getElementById('nova-senha');
-    const confirmaSenha = document.getElementById('confirma-senha');
-    const eyeIcons = document.querySelectorAll('.eye-icon');
+  const usuario = getUsuario();
+  const profissionalId = usuario?.id;
 
-    eyeIcons.forEach(icon => {
-        icon.addEventListener('click', function () {
-            const inputField = this.previousElementSibling;
-            if (inputField && inputField.type === 'password') {
-                inputField.type = 'text';
-                this.textContent = 'visibility_off';
-            } else if (inputField) {
-                inputField.type = 'password';
-                this.textContent = 'visibility';
-            }
-        });
+  try {
+    const profissional = await obterProfissional(profissionalId);
+    popularFormulario(profissional);
+  } catch (err) {
+    showNotification(err.message || 'Erro ao carregar perfil.', 'error');
+  }
+
+  const cepInput = document.getElementById('perfil-cep') || document.getElementById('cep');
+  if (cepInput) {
+    cepInput.addEventListener('blur', async () => {
+      const cep = cepInput.value.replace(/\D/g, '');
+      if (cep.length === 8) {
+        try {
+          const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+          const dados = await res.json();
+          if (!dados.erro) {
+            const set = (suf, v) => {
+              const e = document.getElementById(`perfil-${suf}`) || document.getElementById(suf);
+              if (e) e.value = v;
+            };
+            set('logradouro', dados.logradouro || '');
+            set('bairro', dados.bairro || '');
+            set('cidade', dados.localidade || '');
+            set('estado', dados.uf || '');
+          }
+        } catch {}
+      }
     });
+  }
 
-    if (formDadosSeguranca) {
-        formDadosSeguranca.addEventListener('submit', function (e) {
-            e.preventDefault();
+  const form = document.getElementById('form-perfil') || document.getElementById('perfil-form');
+  if (form) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = form.querySelector('button[type="submit"]');
+      if (btn) { btn.textContent = 'Salvando...'; btn.disabled = true; }
 
-            const temEmail = emailInput && emailInput.value.trim() !== "";
-            const temTelefone = telefoneInput && telefoneInput.value.trim() !== "";
-            const temSenhaAtual = senhaAtual && senhaAtual.value.trim() !== "";
-            const temNovaSenha = novaSenha && novaSenha.value.trim() !== "";
-            const temConfirma = confirmaSenha && confirmaSenha.value.trim() !== "";
+      const dados = {};
+      const campos = ['nome', 'email', 'telefone', 'cpf', 'nascimento', 'cep', 'logradouro', 'numero', 'bairro', 'complemento', 'cidade', 'estado', 'especialidade', 'registro'];
+      campos.forEach(c => {
+        const el = document.getElementById(`perfil-${c}`) || document.getElementById(c);
+        if (el) dados[c] = el.value;
+      });
 
-            if (!temEmail && !temTelefone && !temSenhaAtual && !temNovaSenha && !temConfirma) {
-                alert('Preencha ao menos um campo (E-mail, Telefone ou as Senhas) para poder salvar!');
-                return;
-            }
+      try {
+        await atualizarProfissional(profissionalId, dados);
+        showNotification('Perfil atualizado com sucesso!');
 
-            if (temEmail && emailInput) {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(emailInput.value)) {
-                    alert('Por favor, insira um e-mail válido!');
-                    return;
-                }
-            }
-
-            if (temTelefone && telefoneInput) {
-                if (telefoneInput.value.replace(/\D/g, '').length !== 11) {
-                    alert('O telefone deve conter exatamente 11 dígitos numéricos com o DDD!');
-                    return;
-                }
-            }
-
-            if (temSenhaAtual || temNovaSenha || temConfirma) {
-                if (!temSenhaAtual || !temNovaSenha || !temConfirma) {
-                    alert('Para alterar a senha, você deve preencher os três campos de segurança!');
-                    return;
-                }
-                if (novaSenha && confirmaSenha && novaSenha.value !== confirmaSenha.value) {
-                    alert('A nova senha e a confirmação não coincidem!');
-                    return;
-                }
-            }
-
-            const confirmar = confirm('Deseja realmente confirmar a alteration dos seus dados de acesso?');
-            if (confirmar) {
-                alert('Atualização realizada com sucesso!');
-            }
-        });
-    }
-
-    function tratarBuscaCep() {
-        const cep = cepInput.value.replace(/\D/g, '');
-        if (cep.length !== 8) return;
-
-        fetch(`https://viacep.com.br/ws/${cep}/json/`)
-            .then(response => response.json())
-            .then(data => {
-                if (!data.erro) {
-                    if (ruaInput) ruaInput.value = data.logradouro || '';
-                    if (bairroInput) bairroInput.value = data.bairro || '';
-                    if (cidadeInput) cidadeInput.value = data.localidade || '';
-                    if (ufInput) ufInput.value = data.uf || '';
-                    if (document.getElementById('numero')) document.getElementById('numero').focus();
-                } else {
-                    cepInput.style.borderColor = '#EF4444';
-                    cepInput.removeEventListener('input', tratarBuscaCep);
-                    alert('CEP não encontrado!');
-                    setTimeout(() => {
-                        cepInput.addEventListener('input', tratarBuscaCep);
-                    }, 100);
-                }
-            })
-            .catch(() => alert('Erro ao buscar o CEP!'));
-    }
-
-    if (cepInput) {
-        cepInput.addEventListener('input', tratarBuscaCep);
-    }
-
-    if (formEndereco) {
-        formEndereco.addEventListener('submit', function (e) {
-            e.preventDefault();
-            if (cepInput && cepInput.value.replace(/\D/g, '').length !== 8) {
-                alert('O CEP deve conter exatamente 8 dígitos!');
-                return;
-            }
-
-            const confirmar = confirm('Deseja realmente confirmar a atualização do endereço da clínica?');
-            if (confirmar) {
-                alert('Atualização realizada com sucesso!');
-            }
-        });
-    }
+        const nomeHeader = document.getElementById('perfil-nome-header') || document.getElementById('nome-header');
+        if (nomeHeader && dados.nome) nomeHeader.textContent = dados.nome;
+      } catch (err) {
+        showNotification(err.message || 'Erro ao salvar.', 'error');
+      } finally {
+        if (btn) { btn.textContent = 'Salvar Alterações'; btn.disabled = false; }
+      }
+    });
+  }
 });

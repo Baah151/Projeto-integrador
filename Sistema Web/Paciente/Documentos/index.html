@@ -80,15 +80,32 @@
                 </div>
             </div>
 
-            <section class="upload-section">
-                <div class="upload-card">
+            <!-- Estado: sem consulta ativa -->
+            <section class="upload-section" id="upload-sem-consulta" style="display:none;">
+                <div class="upload-card upload-card-bloqueado">
+                    <span class="material-symbols-outlined" style="color:#D1D5DB;">block</span>
+                    <div>
+                        <h3 style="color:#9CA3AF;">Nenhuma consulta em aberto</h3>
+                        <p>O envio de documentos só é possível quando você tem uma consulta confirmada.</p>
+                    </div>
+                    <a href="../agendamento/index.html" class="btn-upload btn-upload-agendar">Agendar agora</a>
+                </div>
+            </section>
+
+            <!-- Estado: com consulta ativa -->
+            <section class="upload-section" id="upload-com-consulta" style="display:none;">
+                <div class="upload-card upload-card-ativo" id="upload-card-ativo">
                     <span class="material-symbols-outlined">upload_file</span>
                     <div>
-                        <h3>Enviar novo documento</h3>
-                        <p>Formatos aceitos: PDF, JPG</p>
+                        <h3>Encaminhar documento</h3>
+                        <p id="upload-consulta-info">Para sua consulta confirmada</p>
                     </div>
-                    <label for="file-upload" class="btn-upload">Selecionar Arquivo</label>
-                    <input type="file" id="file-upload" hidden onchange="uploadGenerico()">
+                    <label for="file-upload" class="btn-upload" id="btn-upload-label">Selecionar Arquivo</label>
+                    <input type="file" id="file-upload" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" hidden>
+                </div>
+                <div id="upload-progresso" style="display:none;" class="upload-progresso">
+                    <span class="material-symbols-outlined" style="animation:spin 1s linear infinite;font-size:18px;">sync</span>
+                    <span id="upload-progresso-texto">Enviando...</span>
                 </div>
             </section>
 
@@ -111,6 +128,7 @@
 
     <div class="menu-overlay-backdrop" id="menu-backdrop"></div>
 
+    <script src="../assets/api.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

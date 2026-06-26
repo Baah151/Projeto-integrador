@@ -115,13 +115,34 @@
                 </div>
             </div>
 
-            <div class="filter-bar">
-                <input type="date" id="filter-date">
-                <select id="filter-service">
-                    <option value="todos">Todos os Atendimentos</option>
-                    <option value="Fisioterapia">Fisioterapia</option>
-                    <option value="Pilates">Pilates</option>
-                </select>
+            <div class="filtro-periodo-card">
+                <!-- Linha 1: Pills rápidos -->
+                <div class="filtro-pills-row">
+                    <button class="filtro-pill" data-periodo="hoje">Hoje</button>
+                    <button class="filtro-pill" data-periodo="semana">Esta semana</button>
+                    <button class="filtro-pill filtro-pill-ativo" data-periodo="mes">Este mês</button>
+                    <button class="filtro-pill" data-periodo="trimestre">Trimestral</button>
+                    <button class="filtro-pill" data-periodo="ano">Anual</button>
+                </div>
+
+                <!-- Linha 2: Intervalo manual + contador -->
+                <div class="filtro-range-row">
+                    <div class="filtro-range-inputs">
+                        <div class="filtro-range-field">
+                            <label>De</label>
+                            <input type="date" id="filter-inicio">
+                        </div>
+                        <span class="filtro-range-seta">→</span>
+                        <div class="filtro-range-field">
+                            <label>Até</label>
+                            <input type="date" id="filter-fim">
+                        </div>
+                    </div>
+                    <div class="filtro-contador" id="filtro-contador">
+                        <span class="material-symbols-outlined" style="font-size:16px;">event_available</span>
+                        <span id="filtro-count-texto">0 consultas</span>
+                    </div>
+                </div>
             </div>
 
             <section class="appointments-section">
@@ -156,7 +177,21 @@
             <button class="modal-close-btn" id="close-modal-modificar">×</button>
             <h2>Gerenciar Atendimento</h2>
             <p class="modal-subtitle" id="modificar-info-paciente"></p>
-            
+
+            <!-- Observações do paciente -->
+            <div id="obs-paciente-container" style="display:none; background:#F0FDF4; border:1px solid #D1FAE5; border-radius:12px; padding:12px 16px; margin-bottom:16px;">
+                <p style="font-size:0.72rem; font-weight:700; color:#046C4E; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;">Observações do Paciente</p>
+                <p id="obs-paciente-texto" style="font-size:0.85rem; color:#374151; margin:0; white-space:pre-wrap;"></p>
+            </div>
+
+            <!-- Documentos enviados -->
+            <div style="margin-bottom:18px;">
+                <p style="font-size:0.72rem; font-weight:700; color:#046C4E; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">Documentos Enviados</p>
+                <div id="docs-agendamento-lista" style="min-height:32px;">
+                    <small style="color:#9CA3AF;">Nenhum documento.</small>
+                </div>
+            </div>
+
             <div class="modal-actions-row">
                 <button class="btn-action-confirm" id="btn-trigger-finalizar">Finalizar</button>
                 <button class="btn-action-pending" id="btn-trigger-reagendar">Reagendar</button>
@@ -189,22 +224,6 @@
         </div>
     </div>
 
-    <!-- SUB-MODAL REAGENDAR -->
-    <div class="modal-overlay sub-modal" id="modal-sub-reagendar">
-        <div class="modal-card" style="max-width: 540px;">
-            <h2>Reagendar Atendimento</h2>
-            <p class="modal-subtitle" style="margin-bottom: 15px;">Selecione o novo momento clicando diretamente sobre o horário desejado em um dos dias publicados.</p>
-            
-            <div id="reagendar-horarios-container" style="max-height: 340px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; margin-bottom: 25px; padding-right: 5px;">
-            </div>
-
-            <div class="modal-actions-row">
-                <button class="btn-action-pending" id="btn-concluir-reagendamento" style="width:100%;">Concluir Reagendamento</button>
-            </div>
-            <button class="btn-add" id="btn-voltar-reagendar" style="background:#9ca3af; width:100%; margin-top:12px; padding:10px;">Voltar</button>
-        </div>
-    </div>
-
     <!-- SUB-MODAL CANCELAR -->
     <div class="modal-overlay sub-modal" id="modal-sub-cancelar">
         <div class="modal-card small-card">
@@ -224,6 +243,7 @@
 
     <div class="menu-overlay-backdrop" id="menu-backdrop"></div>
 
+    <script src="../assets/api.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

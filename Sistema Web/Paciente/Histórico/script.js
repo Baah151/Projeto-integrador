@@ -1,132 +1,80 @@
-const historicoConsultas = [];
+let historicoConsultas = [];
 
-function renderizarHistorico(filtroData = "") {
-    const container = document.getElementById('history-container');
-    if (!container) return;
-    container.innerHTML = '';
-
-    const dadosFiltrados = historicoConsultas.filter(item => {
-        if (!filtroData) return true;
-        if (!item.data) return false;
-        const partesFiltro = filtroData.split('-');
-        const anoFiltro = partesFiltro[0];
-        const mesFiltro = partesFiltro[1];
-        
-        const partesDoc = item.data.split('/');
-        const mesDoc = partesDoc[1];
-        const anoDoc = partesDoc[2];
-        return mesDoc === mesFiltro && anoDoc === anoFiltro;
-    });
-
-    if (dadosFiltrados.length === 0) {
-        container.innerHTML = `
-            <div class="empty-history">
-                <span class="material-symbols-outlined">folder_open</span>
-                <h2>Nenhum registro encontrado</h2>
-                <p>Suas evoluções e histórico de atendimentos aparecerão aqui após as sessões.</p>
-            </div>
-        `;
-        atualizarSininho();
-        return;
-    }
-
-    dadosFiltrados.forEach(item => {
-        const row = document.createElement('div');
-        row.className = 'history-item';
-
-        if (item.hasOwnProperty('lido') && !item.lido) {
-            row.classList.add('new-history');
-        }
-
-        let docConteudo = 'Nenhum';
-        if (item.documento) {
-            row.addEventListener('click', () => { 
-                item.lido = true; 
-                const filterInput = document.getElementById('history-filter');
-                renderizarHistorico(filterInput ? filterInput.value : ""); 
-            });
-            docConteudo = `
-                <a href="#" class="btn-download-table" onclick="alert('Simulação: Baixando documento do histórico...')">
-                    <span class="material-symbols-outlined" style="font-size: 16px;">download</span> Baixar
-                </a>
-            `;
-        }
-
-        row.innerHTML = `
-            <span>${item.data || ''}</span>
-            <span>${item.horario || ''}</span>
-            <span style="font-weight: 500; color: #1F2937;">${item.servico || ''}</span>
-            <div>${docConteudo}</div>
-            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px;" title="${item.observacoes || ''}">${item.observacoes || 'Nenhuma'}</span>
-            <span style="font-weight: 600; color: #1F2937;">R$ ${typeof item.valor === 'number' ? item.valor.toFixed(2).replace('.', ',') : '0,00'}</span>
-        `;
-        container.appendChild(row);
-    });
-
-    atualizarSininho();
+function gerenciarMenuMobile() {
+  const openBtn = document.getElementById('open-menu-btn');
+  const closeBtn = document.getElementById('close-menu-btn');
+  const sidebar = document.getElementById('mobile-sidebar');
+  const backdrop = document.getElementById('menu-backdrop');
+  if (!openBtn || !sidebar || !backdrop) return;
+  openBtn.addEventListener('click', () => { sidebar.classList.add('open'); backdrop.classList.add('active'); });
+  const fechar = () => { sidebar.classList.remove('open'); backdrop.classList.remove('active'); };
+  if (closeBtn) closeBtn.addEventListener('click', fechar);
+  backdrop.addEventListener('click', fechar);
 }
 
-function atualizarSininho() {
-    const badgeSininho = document.getElementById('notif-badge');
-    const badgeMenuHistorico = document.getElementById('history-notif-badge');
-    
-    const naoLidos = historicoConsultas.filter(item => item.hasOwnProperty('lido') && !item.lido).length;
-
-    if (badgeSininho) {
-        if (naoLidos > 0) {
-            badgeSininho.innerText = naoLidos;
-            badgeSininho.style.display = 'flex';
-        } else {
-            badgeSininho.style.display = 'none';
-        }
-    }
-
-    if (badgeMenuHistorico) {
-        if (naoLidos > 0) {
-            badgeMenuHistorico.innerText = naoLidos;
-            badgeMenuHistorico.style.display = 'flex';
-        } else {
-            badgeMenuHistorico.style.display = 'none';
-        }
-    }
+function formatarDataBR(dataISO) {
+  if (!dataISO) return '';
+  const p = String(dataISO).substring(0, 10).split('-');
+  return `${p[2]}/${p[1]}/${p[0]}`;
 }
 
-function limparNotificacoes() {
-    historicoConsultas.forEach(item => {
-        if (item.hasOwnProperty('lido')) item.lido = true;
-    });
-    const filterInput = document.getElementById('history-filter');
-    renderizarHistorico(filterInput ? filterInput.value : "");
+function formatarHorario(h) {
+  return h ? String(h).substring(0, 5) : '';
+}
+
+function renderizarHistorico(filtroData = '') {
+  const container = document.getElementById('history-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const filtrado = historicoConsultas.filter(item => {
+    if (!filtroData) return true;
+    const dataConsulta = String(item.data_consulta || '').substring(0, 7);
+    return dataConsulta === filtroData;
+  });
+
+  if (filtrado.length === 0) {
+    container.innerHTML = `
+      <div class="empty-history">
+        <span class="material-symbols-outlined">folder_open</span>
+        <h2>Nenhum registro encontrado</h2>
+        <p>Suas evoluções e histórico de atendimentos aparecerão aqui após as sessões.</p>
+      </div>`;
+    return;
+  }
+
+  filtrado.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'history-item';
+    row.innerHTML = `
+      <span>${formatarDataBR(item.data_consulta)}</span>
+      <span>${formatarHorario(item.horario)}</span>
+      <span style="font-weight:500;color:#1F2937;">${item.descricao || item.diagnostico || '—'}</span>
+      <div>—</div>
+      <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px;" title="${item.obs_consulta || ''}">${item.obs_consulta || 'Nenhuma'}</span>
+      <span style="font-weight:600;color:#1F2937;">R$ ${parseFloat(item.valor || 0).toFixed(2).replace('.', ',')}</span>`;
+    container.appendChild(row);
+  });
 }
 
 function filtrarHistorico() {
-    const filterInput = document.getElementById('history-filter');
-    if (filterInput) renderizarHistorico(filterInput.value);
+  const filterInput = document.getElementById('history-filter');
+  if (filterInput) renderizarHistorico(filterInput.value);
 }
 
-function gerenciarMenuMobile() {
-    const openBtn = document.getElementById('open-menu-btn');
-    const closeBtn = document.getElementById('close-menu-btn');
-    const sidebar = document.getElementById('mobile-sidebar');
-    const backdrop = document.getElementById('menu-backdrop');
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!verificarAutenticacaoPaciente()) return;
+  gerenciarMenuMobile();
 
-    if (!openBtn || !sidebar || !backdrop) return;
+  try {
+    historicoConsultas = await obterHistoricoPaciente() || [];
+  } catch (err) {
+    showNotification(err.message || 'Erro ao carregar histórico.', 'error');
+    historicoConsultas = [];
+  }
 
-    openBtn.addEventListener('click', () => {
-        sidebar.classList.add('open');
-        backdrop.classList.add('active');
-    });
+  renderizarHistorico();
 
-    const fecharMenu = () => {
-        sidebar.classList.remove('open');
-        backdrop.classList.remove('active');
-    };
-
-    if (closeBtn) closeBtn.addEventListener('click', fecharMenu);
-    backdrop.addEventListener('click', fecharMenu);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    renderizarHistorico();
-    gerenciarMenuMobile();
+  const filterInput = document.getElementById('history-filter');
+  if (filterInput) filterInput.addEventListener('change', filtrarHistorico);
 });

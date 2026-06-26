@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <script src="../assets/api.js" defer></script>
     <script src="script.js" defer></script>
 </head>
 <body>
@@ -112,46 +113,64 @@
                 </div>
             </div>
 
+            <!-- MÉTRICAS DE SESSÕES -->
             <section class="finance-metrics">
+                <div class="metric-card metric-green">
+                    <p>Total Pago</p>
+                    <h3 id="total-pago">R$ 0,00</h3>
+                    <small id="cnt-pago">0 sessões</small>
+                </div>
+                <div class="metric-card metric-yellow">
+                    <p>A Receber (Pós-Sessão)</p>
+                    <h3 id="total-apos">R$ 0,00</h3>
+                    <small id="cnt-apos">0 sessões</small>
+                </div>
+                <div class="metric-card metric-red">
+                    <p>Pendente</p>
+                    <h3 id="total-pendente">R$ 0,00</h3>
+                    <small id="cnt-pendente">0 sessões</small>
+                </div>
                 <div class="metric-card">
-                    <p>Faturamento do Mês</p>
+                    <p>Total Faturado</p>
                     <h3 id="total-faturamento">R$ 0,00</h3>
-                </div>
-                <div class="metric-card">
-                    <p>Faturamento Médio por Paciente</p>
-                    <h3 id="media-paciente">R$ 0,00</h3>
-                </div>
-                <div class="metric-card">
-                    <p>Sessões Realizadas</p>
-                    <h3 id="total-sessoes">0</h3>
+                    <small id="total-sessoes">0 sessões</small>
                 </div>
             </section>
 
             <div class="actions-row no-print">
-                <input type="month" id="filter-mes" value="2026-05">
+                <input type="month" id="filter-mes">
                 <button class="btn-export" id="btn-exportar">📥 Exportar PDF</button>
             </div>
 
+            <div class="legenda-pagamento no-print">
+                <span class="leg-item leg-verde">Verde = Pago</span>
+                <span class="leg-item leg-amarelo">Amarelo = A receber pós-sessão</span>
+                <span class="leg-item leg-vermelho">Vermelho = Pendente</span>
+            </div>
+
             <div class="print-header-only" style="display: none; margin-bottom: 25px; border-bottom: 2px solid #046C4E; padding-bottom: 10px;">
-                <h2 style="color: #046C4E;">Relatório de Fluxo Financeiro Caixa | Luana Damazio</h2>
+                <h2 style="color: #046C4E;">Relatório Financeiro de Sessões | Luana Damazio</h2>
                 <p style="color: #4b5563; font-size: 0.85rem;" id="print-data-txt">Emitido em: --/--/----</p>
             </div>
 
             <section class="table-container" id="finance-content-box">
                 <div class="empty-state" id="finance-empty">
                     <span class="material-symbols-outlined">payments</span>
-                    <p>Ainda não há registros financeiros para este mês.</p>
-                    <span>Os lançamentos aparecerão automaticamente após a confirmação das sessões.</span>
+                    <p>Ainda não há sessões registradas para este período.</p>
+                    <span>Os lançamentos aparecerão após registrar as sessões na área de Agendados.</span>
                 </div>
 
                 <div id="finance-table-wrapper" style="display: none; width: 100%;">
                     <table class="finance-table">
                         <thead>
                             <tr>
-                                <th>Data do Caixa</th>
-                                <th>Atendimentos do Dia</th>
-                                <th>Total do Dia</th>
-                                <th style="text-align: right; padding-right: 35px;">Status de Desempenho</th>
+                                <th>Paciente</th>
+                                <th>Data</th>
+                                <th>Sessão #</th>
+                                <th>Valor</th>
+                                <th>Forma</th>
+                                <th style="text-align:center;">Status</th>
+                                <th style="text-align:center;">Ação</th>
                             </tr>
                         </thead>
                         <tbody id="finance-rows">

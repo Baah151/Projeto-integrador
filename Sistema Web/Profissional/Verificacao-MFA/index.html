@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificação de Segurança | Luana Damazio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .mfa-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 48px 40px;
+            width: 100%;
+            max-width: 440px;
+            box-shadow: 0 8px 40px rgba(4, 108, 78, 0.12);
+            text-align: center;
+        }
+
+        .mfa-icon {
+            width: 72px;
+            height: 72px;
+            background: #f0fdf4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            border: 2px solid #d1fae5;
+        }
+
+        .mfa-icon span { font-size: 2rem; color: #046C4E; }
+
+        h1 { font-size: 1.4rem; color: #065F46; font-weight: 700; margin-bottom: 8px; }
+
+        .mfa-desc {
+            font-size: 0.85rem;
+            color: #6B7280;
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .email-destino {
+            font-size: 0.85rem;
+            color: #046C4E;
+            font-weight: 600;
+            margin-bottom: 32px;
+            background: #f0fdf4;
+            padding: 8px 16px;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .codigo-inputs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .codigo-inputs input {
+            width: 52px;
+            height: 60px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1.6rem;
+            font-weight: 700;
+            text-align: center;
+            color: #065F46;
+            outline: none;
+            transition: border-color 0.2s;
+            caret-color: #046C4E;
+        }
+
+        .codigo-inputs input:focus { border-color: #046C4E; background: #f0fdf4; }
+        .codigo-inputs input.preenchido { border-color: #6EE7B7; }
+
+        .lembrar-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 12px 16px;
+            margin-bottom: 24px;
+            cursor: pointer;
+            text-align: left;
+        }
+
+        .lembrar-wrapper input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #046C4E;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .lembrar-wrapper label {
+            font-size: 0.82rem;
+            color: #374151;
+            cursor: pointer;
+            line-height: 1.4;
+        }
+
+        .lembrar-wrapper label strong { color: #046C4E; }
+
+        .btn-verificar {
+            width: 100%;
+            padding: 14px;
+            background: #046C4E;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 16px;
+        }
+
+        .btn-verificar:hover { background: #065F46; }
+        .btn-verificar:disabled { background: #9CA3AF; cursor: not-allowed; }
+
+        .reenvio-row {
+            font-size: 0.8rem;
+            color: #9CA3AF;
+        }
+
+        .btn-reenviar {
+            background: none;
+            border: none;
+            color: #046C4E;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            text-decoration: underline;
+        }
+
+        .btn-reenviar:disabled { color: #9CA3AF; cursor: not-allowed; text-decoration: none; }
+
+        .voltar-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #9CA3AF;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .voltar-link:hover { color: #046C4E; }
+
+        .timer { font-weight: 600; color: #374151; }
+    </style>
+</head>
+<body>
+    <div class="mfa-card">
+        <div class="mfa-icon">
+            <span class="material-symbols-outlined">shield_lock</span>
+        </div>
+
+        <h1>Verificação de Segurança</h1>
+        <p class="mfa-desc">Enviamos um código de 6 dígitos para o e-mail:</p>
+        <span class="email-destino" id="email-destino">carregando...</span>
+
+        <div class="codigo-inputs" id="codigo-inputs">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d1">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d2">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d3">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d4">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d5">
+            <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d6">
+        </div>
+
+        <div class="lembrar-wrapper">
+            <input type="checkbox" id="lembrar-dispositivo">
+            <label for="lembrar-dispositivo">
+                Lembrar este dispositivo por <strong>3 dias</strong> — não pedir código novamente neste navegador
+            </label>
+        </div>
+
+        <button class="btn-verificar" id="btn-verificar">Verificar e Entrar</button>
+
+        <div class="reenvio-row">
+            Não recebeu?
+            <button class="btn-reenviar" id="btn-reenviar" disabled>
+                Reenviar código (<span class="timer" id="timer">60</span>s)
+            </button>
+        </div>
+
+        <a href="../login/index.html" class="voltar-link">
+            <span class="material-symbols-outlined" style="font-size:1rem;">arrow_back</span>
+            Voltar ao login
+        </a>
+    </div>
+
+    <script src="../assets/api.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

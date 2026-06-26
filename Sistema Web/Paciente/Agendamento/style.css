@@ -172,7 +172,7 @@ body {
     position: relative;
 }
 
-.time-slot:hover:not(.esgotado) {
+.time-slot:hover:not(.esgotado):not(.time-slot-ocupado) {
     border-color: #00BF63;
     color: #00BF63;
     background: white;
@@ -189,6 +189,46 @@ body {
     border-color: #E5E7EB;
     color: #9CA3AF;
     cursor: not-allowed;
+}
+
+/* Slot ocupado - cinza com X */
+.time-slot.time-slot-ocupado {
+    background-color: #F3F4F6;
+    border-color: #D1D5DB;
+    border-style: dashed;
+    color: #9CA3AF;
+    cursor: not-allowed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 10px 8px;
+    opacity: 0.75;
+    position: relative;
+}
+
+.time-slot.time-slot-ocupado .slot-hora {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #9CA3AF;
+    line-height: 1;
+}
+
+.time-slot.time-slot-ocupado .slot-x {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #D1D5DB;
+    line-height: 1;
+}
+
+.time-slot.time-slot-ocupado .slot-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #9CA3AF;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1;
 }
 
 .time-slot.esgotado::after {

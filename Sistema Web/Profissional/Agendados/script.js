@@ -1,304 +1,285 @@
 function gerenciarMenuMobile() {
-    const openBtn = document.getElementById('open-menu-btn');
-    const closeBtn = document.getElementById('close-menu-btn');
-    const sidebar = document.getElementById('mobile-sidebar');
-    const backdrop = document.getElementById('menu-backdrop');
-
-    if (!openBtn || !sidebar || !backdrop) return;
-
-    openBtn.addEventListener('click', () => {
-        sidebar.classList.add('open');
-        backdrop.classList.add('active');
-    });
-
-    const fecharMenu = () => {
-        sidebar.classList.remove('open');
-        backdrop.classList.remove('active');
-    };
-
-    if (closeBtn) closeBtn.addEventListener('click', fecharMenu);
-    backdrop.addEventListener('click', fecharMenu);
+  const openBtn = document.getElementById('open-menu-btn');
+  const closeBtn = document.getElementById('close-menu-btn');
+  const sidebar = document.getElementById('mobile-sidebar');
+  const backdrop = document.getElementById('menu-backdrop');
+  if (!openBtn || !sidebar || !backdrop) return;
+  openBtn.addEventListener('click', () => { sidebar.classList.add('open'); backdrop.classList.add('active'); });
+  const fechar = () => { sidebar.classList.remove('open'); backdrop.classList.remove('active'); };
+  if (closeBtn) closeBtn.addEventListener('click', fechar);
+  backdrop.addEventListener('click', fechar);
 }
 
-window.addEventListener('DOMContentLoaded', () => {
-    gerenciarMenuMobile();
+let agendamentosLista = [];
+let agendamentoSelecionado = null;
 
-    const emptyState = document.getElementById('appointments-empty');
-    const tableWrapper = document.getElementById('appointments-table-wrapper');
-    const rowsContainer = document.getElementById('appointments-rows');
+function formatarDataBR(dataString) {
+  if (!dataString) return '--/--/----';
+  const p = String(dataString).substring(0, 10).split('-');
+  return `${p[2]}/${p[1]}/${p[0]}`;
+}
 
-    const filterDate = document.getElementById('filter-date');
-    const filterService = document.getElementById('filter-service');
+function renderizarTabela(lista) {
+  const wrapper = document.getElementById('appointments-table-wrapper');
+  const empty = document.getElementById('appointments-empty');
+  const tbody = document.getElementById('appointments-rows');
+  if (!tbody) return;
 
-    const modalModificar = document.getElementById('modal-modificar');
-    const modalSubFinalizar = document.getElementById('modal-sub-finalizar');
-    const modalSubReagendar = document.getElementById('modal-sub-reagendar');
-    const modalSubCancelar = document.getElementById('modal-sub-cancelar');
+  tbody.innerHTML = '';
 
-    const btnFecharModificar = document.getElementById('close-modal-modificar');
-    const btnTriggerFinalizar = document.getElementById('btn-trigger-finalizar');
-    const btnTriggerReagendar = document.getElementById('btn-trigger-reagendar');
-    const btnTriggerCancelar = document.getElementById('btn-trigger-cancelar');
+  if (!lista || lista.length === 0) {
+    if (wrapper) wrapper.style.display = 'none';
+    if (empty) empty.style.display = 'flex';
+    return;
+  }
 
-    const btnVoltarFinalizar = document.getElementById('btn-voltar-finalizar');
-    const btnVoltarReagendar = document.getElementById('btn-voltar-reagendar');
-    const btnVoltarCancelar = document.getElementById('btn-voltar-cancelar');
+  if (wrapper) wrapper.style.display = 'block';
+  if (empty) empty.style.display = 'none';
 
-    const btnEnviarNota = document.getElementById('btn-enviar-nota');
-    const btnNotaDepois = document.getElementById('btn-nota-depois');
-    const btnConcluirReagendamento = document.getElementById('btn-concluir-reagendamento');
-    const btnConcluirCancelarAgenda = document.getElementById('btn-concluir-cancelar-agenda');
+  lista.forEach(a => {
+    const temDoc = Number(a.num_documentos) > 0;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <strong>${a.nome_paciente || '--'}</strong>
+        ${temDoc ? `<span class="badge-doc-novo" title="Novo documento encaminhado">
+          <span class="material-symbols-outlined" style="font-size:13px;vertical-align:middle;">attach_file</span>
+          Novo doc.
+        </span>` : ''}
+      </td>
+      <td>${formatarDataBR(a.data_consulta)}</td>
+      <td>${a.horario ? a.horario.substring(0,5) : '--'}</td>
+      <td>Consulta</td>
+      <td style="text-align:right;padding-right:25px;">
+        <button class="btn-gerenciar" data-id="${a.id_agendamento}">Gerenciar</button>
+      </td>
+    `;
+    tr.querySelector('.btn-gerenciar').addEventListener('click', () => abrirModalGerenciar(a));
+    tbody.appendChild(tr);
+  });
+}
 
-    const containerHorariosReagendar = document.getElementById('reagendar-horarios-container');
+function formatarBytes(bytes) {
+  if (!bytes) return '';
+  return bytes > 1024 * 1024
+    ? `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+    : `${Math.round(bytes / 1024)} KB`;
+}
 
-    const bellButton = document.getElementById('bell-button');
-    const notiDropdown = document.getElementById('noti-dropdown');
-    const dropdownBody = document.getElementById('dropdown-body');
+async function downloadDocumento(docMeta) {
+  try {
+    const doc = await apiRequest('GET', `/documentos/${docMeta.id_documento}/download`);
+    if (!doc || !doc.conteudo_base64) { showNotification('Arquivo sem conteúdo.', 'error'); return; }
+    const link = document.createElement('a');
+    link.href = `data:${doc.tipo_arquivo || 'application/octet-stream'};base64,${doc.conteudo_base64}`;
+    link.download = doc.nome_arquivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch {
+    showNotification('Erro ao baixar arquivo.', 'error');
+  }
+}
 
-    if (bellButton) {
-        bellButton.addEventListener('click', function(e) {
-            e.stopPropagation();
-            notiDropdown.classList.toggle('show');
-        });
+async function carregarDocsAgendamento(agendamentoId, pacienteId) {
+  const container = document.getElementById('docs-agendamento-lista');
+  if (!container) return;
+  container.innerHTML = '<small style="color:#9CA3AF;">Carregando...</small>';
+  try {
+    const docs = await apiRequest('GET', `/documentos/agendamento/${agendamentoId}?pacienteId=${pacienteId}`) || [];
+    if (docs.length === 0) {
+      container.innerHTML = '<small style="color:#9CA3AF;">Nenhum documento enviado pelo paciente.</small>';
+      return;
     }
-
-    document.addEventListener('click', function() {
-        if (notiDropdown) {
-            notiDropdown.classList.remove('show');
-        }
+    container.innerHTML = '';
+    docs.forEach(d => {
+      const item = document.createElement('div');
+      item.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f3f4f6;';
+      item.innerHTML = `
+        <span style="font-size:0.82rem;color:#374151;">📎 <strong>${d.nome_arquivo}</strong> <small style="color:#9CA3AF;">${formatarBytes(d.tamanho_bytes)}</small></span>
+        <button style="background:#10B981;color:white;border:none;padding:4px 12px;border-radius:8px;font-size:0.75rem;cursor:pointer;font-weight:600;">Download</button>
+      `;
+      item.querySelector('button').addEventListener('click', () => downloadDocumento(d));
+      container.appendChild(item);
     });
+  } catch {
+    container.innerHTML = '<small style="color:#ef4444;">Erro ao carregar documentos.</small>';
+  }
+}
 
-    let agendadosMock = [];
-    let itemSelecionadoId = null;
-    let horarioReagendamentoEscolhido = null;
-    let diaEscolhidoReagendamento = null;
+function abrirModalGerenciar(agendamento) {
+  agendamentoSelecionado = agendamento;
+  const info = document.getElementById('modificar-info-paciente');
+  if (info) info.textContent = `${agendamento.nome_paciente || '--'} — ${formatarDataBR(agendamento.data_consulta)} às ${agendamento.horario ? agendamento.horario.substring(0,5) : '--'}`;
 
-    function formatarDataBR(dataString) {
-        const partes = dataString.split('-');
-        return `${partes[2]}/${partes[1]}/${partes[0]}`;
-    }
+  const obsContainer = document.getElementById('obs-paciente-container');
+  const obsTexto = document.getElementById('obs-paciente-texto');
+  if (agendamento.observacoes) {
+    if (obsContainer) obsContainer.style.display = 'block';
+    if (obsTexto) obsTexto.textContent = agendamento.observacoes;
+  } else {
+    if (obsContainer) obsContainer.style.display = 'none';
+  }
 
-    function renderizarTabela() {
-        rowsContainer.innerHTML = '';
-        const dataFiltro = filterDate.value;
-        const servicoFiltro = filterService.value;
+  if (agendamento.id_agendamento && agendamento.id_paciente) {
+    carregarDocsAgendamento(agendamento.id_agendamento, agendamento.id_paciente);
+  }
 
-        const filtrados = agendadosMock.filter(item => {
-            const bateData = !dataFiltro || item.data === dataFiltro;
-            const bateServico = servicoFiltro === 'todos' || item.servico === servicoFiltro;
-            return bateData && bateServico;
-        });
+  document.getElementById('modal-modificar').classList.add('active');
+}
 
-        if (filtrados.length === 0) {
-            if (tableWrapper) tableWrapper.style.display = 'none';
-            if (emptyState) emptyState.style.display = 'block';
-            return;
-        }
+async function carregarAgendamentos() {
+  try {
+    agendamentosLista = await listarAgendamentos({ status: 'Confirmado' });
+  } catch (err) {
+    showNotification(err.message || 'Erro ao carregar agendamentos.', 'error');
+    agendamentosLista = [];
+  }
+}
 
-        if (tableWrapper) tableWrapper.style.display = 'block';
-        if (emptyState) emptyState.style.display = 'none';
-        filtrados.sort((a, b) => a.data.localeCompare(b.data) || a.hora.localeCompare(b.hora));
+// ── Utilitários de período ────────────────────────────────────────
+function toISO(d) { return d.toISOString().substring(0, 10); }
 
-        filtrados.forEach(item => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><strong>${item.nome}</strong></td>
-                <td>${formatarDataBR(item.data)}</td>
-                <td><strong>${item.hora}</strong></td>
-                <td>${item.servico}</td>
-                <td style="text-align: right;"><button class="btn-modify" data-id="${item.id}">Modificar</button></td>
-            `;
-            tr.querySelector('.btn-modify').addEventListener('click', () => abrirPainelModificar(item.id));
-            rowsContainer.appendChild(tr);
-        });
-    }
+function calcularPeriodo(periodo) {
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
 
-    function abrirPainelModificar(id) {
-        const item = agendadosMock.find(a => a.id === id);
-        if (!item) return;
-        itemSelecionadoId = id;
-        document.getElementById('modificar-info-paciente').textContent = `Paciente: ${item.nome} | ${item.servico} às ${item.hora} do dia ${formatarDataBR(item.data)}`;
-        modalModificar.classList.add('active');
-    }
+  if (periodo === 'hoje') {
+    return { inicio: toISO(hoje), fim: toISO(hoje) };
+  }
+  if (periodo === 'semana') {
+    const dom = new Date(hoje);
+    dom.setDate(hoje.getDate() - hoje.getDay());
+    const sab = new Date(dom);
+    sab.setDate(dom.getDate() + 6);
+    return { inicio: toISO(dom), fim: toISO(sab) };
+  }
+  if (periodo === 'mes') {
+    const ini = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    const fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+    return { inicio: toISO(ini), fim: toISO(fim) };
+  }
+  if (periodo === 'trimestre') {
+    const mesAtual = hoje.getMonth(); // 0–11
+    const inicioTrimestre = Math.floor(mesAtual / 3) * 3; // 0, 3, 6 ou 9
+    const ini = new Date(hoje.getFullYear(), inicioTrimestre, 1);
+    const fim = new Date(hoje.getFullYear(), inicioTrimestre + 3, 0); // dia 0 do mês seguinte = último dia do trimestre
+    return { inicio: toISO(ini), fim: toISO(fim) };
+  }
+  if (periodo === 'ano') {
+    const ini = new Date(hoje.getFullYear(), 0, 1);
+    const fim = new Date(hoje.getFullYear(), 11, 31);
+    return { inicio: toISO(ini), fim: toISO(fim) };
+  }
+  return { inicio: null, fim: null };
+}
 
-    function fecharTodosModais() {
-        modalModificar.classList.remove('active');
-        modalSubFinalizar.classList.remove('active');
-        modalSubReagendar.classList.remove('active');
-        modalSubCancelar.classList.remove('active');
-        
-        document.getElementById('finalizar-valor').value = '';
-        document.getElementById('finalizar-observacao').value = '';
-        document.getElementById('cancelar-motivo').value = '';
-        if (containerHorariosReagendar) containerHorariosReagendar.innerHTML = '';
-        
-        itemSelecionadoId = null;
-        diaEscolhidoReagendamento = null;
-        horarioReagendamentoEscolhido = null;
-    }
+function aplicarFiltroRange(inicio, fim) {
+  const filtered = agendamentosLista.filter(a => {
+    const data = a.data_consulta ? String(a.data_consulta).substring(0, 10) : null;
+    if (!data) return false;
+    if (inicio && data < inicio) return false;
+    if (fim && data > fim) return false;
+    return true;
+  });
 
-    function removerAgendamentoAtual() {
-        agendadosMock = agendadosMock.filter(a => a.id !== itemSelecionadoId);
-        fecharTodosModais();
-        renderizarTabela();
-    }
+  renderizarTabela(filtered);
 
-    function carregarEspelhoDaAgendaPublicada() {
-        if (!containerHorariosReagendar) return;
-        containerHorariosReagendar.innerHTML = '';
-        diaEscolhidoReagendamento = null;
-        horarioReagendamentoEscolhido = null;
+  // Atualizar contador
+  const countTexto = document.getElementById('filtro-count-texto');
+  if (countTexto) {
+    countTexto.textContent = `${filtered.length} consulta${filtered.length !== 1 ? 's' : ''} em aberto`;
+  }
+}
 
-        const agendasSalvas = localStorage.getItem('agendaPublicadaProfissional');
-        let agendaPublicada = agendasSalvas ? JSON.parse(agendasSalvas) : [];
+window.addEventListener('DOMContentLoaded', async () => {
+  if (!verificarAutenticacao()) return;
+  gerenciarMenuMobile();
 
-        if (agendaPublicada.length === 0) {
-            containerHorariosReagendar.innerHTML = '<span style="font-size:0.85rem; color:#ef4444; text-align:center; padding: 20px 0; font-weight:500;">Nenhuma agenda ativa publicada no sistema.</span>';
-            return;
-        }
+  const dropdownBody = document.getElementById('dropdown-body');
+  if (dropdownBody) dropdownBody.innerHTML = '<div class="dropdown-item" style="text-align:center;color:#9ca3af;">Nenhuma notificação.</div>';
 
-        agendaPublicada.sort((a, b) => a.data.localeCompare(b.data));
+  const bell = document.getElementById('bell-button');
+  const notiDropdown = document.getElementById('noti-dropdown');
+  if (bell && notiDropdown) {
+    bell.addEventListener('click', (e) => { e.stopPropagation(); notiDropdown.classList.toggle('show'); });
+    document.addEventListener('click', () => notiDropdown.classList.remove('show'));
+  }
 
-        agendaPublicada.forEach(bloco => {
-            const cardBloco = document.createElement('div');
-            cardBloco.className = 'reagendar-block-card';
+  const inputInicio = document.getElementById('filter-inicio');
+  const inputFim = document.getElementById('filter-fim');
 
-            const headerBloco = document.createElement('div');
-            headerBloco.className = 'reagendar-card-header';
-            headerBloco.innerHTML = `📅 Dia ${formatarDataBR(bloco.data)}`;
-            cardBloco.appendChild(headerBloco);
+  // Pills rápidos
+  document.querySelectorAll('.filtro-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('.filtro-pill').forEach(p => p.classList.remove('filtro-pill-ativo'));
+      pill.classList.add('filtro-pill-ativo');
 
-            bloco.horarios.sort((a, b) => a.hora.localeCompare(b.hora));
-
-            bloco.horarios.forEach(h => {
-                const rowAtendimento = document.createElement('div');
-                rowAtendimento.className = 'reagendar-card-row';
-                const totalVagas = parseInt(h.vagas);
-
-                if (totalVagas <= 0) {
-                    rowAtendimento.style.cursor = 'not-allowed';
-                    rowAtendimento.style.opacity = '0.5';
-                    rowAtendimento.innerHTML = `
-                        <div class="reagendar-card-info">
-                            <strong>${h.hora}</strong> - ${h.servico} 
-                            <span class="reagendar-card-vagas esgotado">(0 vagas)</span>
-                        </div>
-                    `;
-                } else {
-                    rowAtendimento.innerHTML = `
-                        <div class="reagendar-card-info">
-                            <strong>${h.hora}</strong> - ${h.servico} 
-                            <span class="reagendar-card-vagas">(${totalVagas} vagas)</span>
-                        </div>
-                    `;
-
-                    rowAtendimento.addEventListener('click', () => {
-                        document.querySelectorAll('.reagendar-card-row').forEach(r => r.classList.remove('selected'));
-                        rowAtendimento.classList.add('selected');
-                        diaEscolhidoReagendamento = bloco.data;
-                        horarioReagendamentoEscolhido = h.hora;
-                    });
-                }
-                cardBloco.appendChild(rowAtendimento);
-            });
-
-            containerHorariosReagendar.appendChild(cardBloco);
-        });
-    }
-
-    function carregarNotificacoesSininhoERadius() {
-        const menuBadge = document.getElementById('badge-painel');
-        if (menuBadge) {
-            menuBadge.style.display = 'none';
-        }
-
-        const notiBadge = document.getElementById('noti-badge');
-        if (notiBadge) {
-            notiBadge.textContent = '0';
-            notiBadge.style.display = 'block';
-        }
-
-        if (dropdownBody) {
-            dropdownBody.innerHTML = '<div class="dropdown-item" style="text-align:center; color:#9ca3af;">Nenhuma notificação recente.</div>';
-        }
-    }
-
-    btnFecharModificar.addEventListener('click', fecharTodosModais);
-    btnVoltarFinalizar.addEventListener('click', () => modalSubFinalizar.classList.remove('active'));
-    btnVoltarReagendar.addEventListener('click', () => modalSubReagendar.classList.remove('active'));
-    btnVoltarCancelar.addEventListener('click', () => modalSubCancelar.classList.remove('active'));
-
-    btnTriggerFinalizar.addEventListener('click', () => modalSubFinalizar.classList.add('active'));
-    
-    btnTriggerReagendar.addEventListener('click', () => {
-        carregarEspelhoDaAgendaPublicada();
-        modalSubReagendar.classList.add('active');
+      const { inicio, fim } = calcularPeriodo(pill.dataset.periodo);
+      if (inputInicio) inputInicio.value = inicio || '';
+      if (inputFim) inputFim.value = fim || '';
+      aplicarFiltroRange(inicio, fim);
     });
-    
-    btnTriggerCancelar.addEventListener('click', () => modalSubCancelar.classList.add('active'));
+  });
 
-    btnEnviarNota.addEventListener('click', () => {
-        const valor = document.getElementById('finalizar-valor').value;
-        const obs = document.getElementById('finalizar-observacao').value;
-        if (!valor || !obs.trim()) {
-            alert('Ação bloqueada! Para finalizar a sessão, você precisa preencher o valor e a evolução clínica.');
-            return;
-        }
-        alert('Sessão Finalizada com Sucesso! O atendimento e a evolução foram enviados para o prontuário do paciente.');
-        removerAgendamentoAtual();
-    });
+  // Inputs manuais desativam pills
+  function onRangeManual() {
+    document.querySelectorAll('.filtro-pill').forEach(p => p.classList.remove('filtro-pill-ativo'));
+    aplicarFiltroRange(inputInicio?.value || null, inputFim?.value || null);
+  }
+  inputInicio?.addEventListener('change', onRangeManual);
+  inputFim?.addEventListener('change', onRangeManual);
 
-    btnNotaDepois.addEventListener('click', () => {
-        const valor = document.getElementById('finalizar-valor').value;
-        if (!valor) {
-            alert('Ação bloqueada! Para avançar e registrar as observações depois, insira o valor da sessão.');
-            return;
-        }
-        alert('Sessão Concluída! Evolução clínica pendente configurada para preenchimento posterior.');
-        removerAgendamentoAtual();
-    });
+  await carregarAgendamentos();
 
-    btnConcluirReagendamento.addEventListener('click', () => {
-        if (!diaEscolhidoReagendamento || !horarioReagendamentoEscolhido) {
-            alert('Ação bloqueada! Clique sobre uma linha de horário activa com vagas em qualquer um dos cartões para selecionar.');
-            return;
-        }
+  // Aplicar "Este mês" como padrão ao carregar
+  const periodoInicial = calcularPeriodo('mes');
+  if (inputInicio) inputInicio.value = periodoInicial.inicio;
+  if (inputFim) inputFim.value = periodoInicial.fim;
+  aplicarFiltroRange(periodoInicial.inicio, periodoInicial.fim);
 
-        const item = agendadosMock.find(a => a.id === itemSelecionadoId);
-        if (item) {
-            item.data = diaEscolhidoReagendamento;
-            item.hora = horarioReagendamentoEscolhido;
-            
-            const agendasSalvas = localStorage.getItem('agendaPublicadaProfissional');
-            let agendaPublicada = agendasSalvas ? JSON.parse(agendasSalvas) : [];
-            const bloco = agendaPublicada.find(b => b.data === diaEscolhidoReagendamento);
-            if (bloco) {
-                const hInfo = bloco.horarios.find(h => h.hora === horarioReagendamentoEscolhido);
-                if (hInfo) item.servico = hInfo.servico;
-            }
-        }
+  // Modal principal
+  const modalModificar = document.getElementById('modal-modificar');
+  document.getElementById('close-modal-modificar')?.addEventListener('click', () => modalModificar.classList.remove('active'));
 
-        alert('Atendimento Reagendado com Sucesso! Os dados foram atualizados na grade.');
-        fecharTodosModais();
-        renderizarTabela();
-    });
+  // --- FINALIZAR → navega para página Registrar-Sessao ---
+  document.getElementById('btn-trigger-finalizar')?.addEventListener('click', () => {
+    if (!agendamentoSelecionado) return;
+    localStorage.setItem('sessao_agendamento', JSON.stringify(agendamentoSelecionado));
+    window.location.href = '../Registrar-Sessao/index.html';
+  });
 
-    btnConcluirCancelarAgenda.addEventListener('click', () => {
-        const motivo = document.getElementById('cancelar-motivo').value;
-        if (!motivo.trim()) {
-            alert('Por favor, informe o motivo do cancelamento.');
-            return;
-        }
-        alert('Atendimento Cancelado! A sessão foi arquivada.');
-        removerAgendamentoAtual();
-    });
+  // --- REAGENDAR → Registrar-Sessao com pagamento + reagendamento pré-ativado ---
+  document.getElementById('btn-trigger-reagendar')?.addEventListener('click', () => {
+    if (!agendamentoSelecionado) return;
+    localStorage.setItem('sessao_agendamento', JSON.stringify(agendamentoSelecionado));
+    localStorage.setItem('sessao_modo', 'reagendar');
+    window.location.href = '../Registrar-Sessao/index.html';
+  });
 
-    function renderizacoesIniciais() {
-        renderizarTabela();
-        carregarNotificacoesSininhoERadius();
+  // --- CANCELAR ---
+  const modalCancelar = document.getElementById('modal-sub-cancelar');
+  document.getElementById('btn-trigger-cancelar')?.addEventListener('click', () => {
+    modalModificar.classList.remove('active');
+    document.getElementById('cancelar-motivo').value = '';
+    modalCancelar.classList.add('active');
+  });
+  document.getElementById('btn-voltar-cancelar')?.addEventListener('click', () => { modalCancelar.classList.remove('active'); modalModificar.classList.add('active'); });
+
+  document.getElementById('btn-concluir-cancelar-agenda')?.addEventListener('click', async () => {
+    if (!agendamentoSelecionado) return;
+    const btn = document.getElementById('btn-concluir-cancelar-agenda');
+    btn.disabled = true;
+    try {
+      await cancelarAgendamento(agendamentoSelecionado.id_agendamento);
+      showNotification('Agendamento cancelado.');
+      modalCancelar.classList.remove('active');
+      agendamentosLista = agendamentosLista.filter(a => a.id_agendamento !== agendamentoSelecionado.id_agendamento);
+      renderizarTabela(agendamentosLista);
+    } catch (err) {
+      showNotification(err.message || 'Erro ao cancelar.', 'error');
+    } finally {
+      btn.disabled = false;
     }
-
-    filterDate.addEventListener('change', renderizarTabela);
-    filterService.addEventListener('change', renderizarTabela);
-    renderizacoesIniciais();
+  });
 });

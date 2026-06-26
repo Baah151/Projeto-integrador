@@ -92,6 +92,22 @@ CREATE TABLE historico (
         FOREIGN KEY (id_consulta) REFERENCES consulta(id_consulta)
 );
 
+CREATE TABLE solicitacao (
+    id_solicitacao  SERIAL PRIMARY KEY,
+    id_profissional INT NOT NULL,
+    id_paciente     INT,
+    titulo          VARCHAR(200) NOT NULL,
+    descricao       TEXT,
+    status          VARCHAR(30) DEFAULT 'Pendente',
+    resposta        TEXT,
+    data_criacao    TIMESTAMP DEFAULT NOW(),
+    data_resposta   TIMESTAMP,
+    CONSTRAINT fk_solicitacao_profissional
+        FOREIGN KEY (id_profissional) REFERENCES profissional(id_profissional),
+    CONSTRAINT fk_solicitacao_paciente
+        FOREIGN KEY (id_paciente) REFERENCES paciente(id_paciente)
+);
+
 CREATE TABLE disponibilidade_agenda (
     id_disponibilidade SERIAL PRIMARY KEY,
     id_profissional    INT NOT NULL,

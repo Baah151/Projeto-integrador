@@ -86,6 +86,24 @@
                     </div>
                 </section>
 
+                <!-- SEÇÃO DE LAUDOS -->
+                <div style="margin-top:40px; border-top:1px solid #d1fae5; padding-top:28px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                        <h2 class="section-title" style="margin:0;">Laudos e Documentos</h2>
+                        <label class="btn-upload-laudo" style="cursor:pointer; background:#046C4E; color:white; padding:8px 18px; border-radius:10px; font-size:0.82rem; font-weight:600; display:flex; align-items:center; gap:6px;">
+                            <span class="material-symbols-outlined" style="font-size:18px;">upload_file</span>
+                            Enviar Laudo
+                            <input type="file" id="input-laudo-upload" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" style="display:none;">
+                        </label>
+                    </div>
+                    <div id="laudos-container">
+                        <div class="empty-timeline-state" id="laudos-empty" style="padding:20px;">
+                            <span class="material-symbols-outlined">folder_open</span>
+                            <p style="margin:0;font-size:0.85rem;color:#9CA3AF;">Nenhum documento enviado.</p>
+                        </div>
+                    </div>
+                </div>
+
                 <div style="margin-top: 40px; border-top: 1px solid #d1fae5; padding-top: 20px; text-align: left;">
                     <button class="btn-account-delete" id="btn-abrir-excluir">Excluir Conta do Paciente</button>
                 </div>
@@ -97,17 +115,29 @@
     <div class="modal-overlay" id="modal-agendar-prontuario">
         <div class="modal-card-alert" style="max-width: 500px; text-align: left;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #E5E7EB; padding-bottom: 10px;">
-                <h2 style="font-size: 1.25rem; color: #065F46; margin: 0;">Novo Agendamento</h2>
+                <h2 style="font-size: 1.25rem; color: #065F46; margin: 0;">Nova Consulta</h2>
                 <button id="btn-fechar-agendar" style="background: none; border: none; font-size: 1.5rem; color: #9CA3AF; cursor: pointer;">&times;</button>
             </div>
-            <p style="color: #4B5563; font-size: 0.85rem; margin-bottom: 15px;">Selecione um dos horários activos que você publicou na aba de gerenciamento.</p>
-            
-            <div id="container-vagas-publicadas" style="max-height: 250px; overflow-y: auto; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px;">
+            <p style="color: #4B5563; font-size: 0.85rem; margin-bottom: 20px;">Selecione a data e o horário da consulta para este paciente.</p>
+
+            <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px;">
+                <div>
+                    <label style="font-size:0.78rem; font-weight:600; color:#046C4E; display:block; margin-bottom:6px;">Data da Consulta*</label>
+                    <input type="date" id="agendar-data" style="width:100%; padding:11px 14px; border:2px solid #e5e7eb; border-radius:10px; font-size:0.9rem; outline:none; font-family:'Poppins',sans-serif;">
+                </div>
+                <div>
+                    <label style="font-size:0.78rem; font-weight:600; color:#046C4E; display:block; margin-bottom:6px;">Horário*</label>
+                    <input type="time" id="agendar-horario" style="width:100%; padding:11px 14px; border:2px solid #e5e7eb; border-radius:10px; font-size:0.9rem; outline:none; font-family:'Poppins',sans-serif;">
+                </div>
+                <div>
+                    <label style="font-size:0.78rem; font-weight:600; color:#046C4E; display:block; margin-bottom:6px;">Observação (opcional)</label>
+                    <textarea id="agendar-obs" rows="2" placeholder="Ex: Trazer exames, primeira consulta..." style="width:100%; padding:11px 14px; border:2px solid #e5e7eb; border-radius:10px; font-size:0.85rem; outline:none; resize:vertical; font-family:'Poppins',sans-serif;"></textarea>
+                </div>
             </div>
 
             <div class="modal-alert-buttons" style="justify-content: flex-end;">
                 <button type="button" class="btn-alert-cancel" id="btn-cancelar-agendar">Cancelar</button>
-                <button type="button" class="btn-alert-submit" id="btn-concluir-agendar" style="background-color: #046C4E;">Confirmar Vaga</button>
+                <button type="button" class="btn-alert-submit" id="btn-concluir-agendar" style="background-color: #046C4E;">Confirmar Consulta</button>
             </div>
         </div>
     </div>
@@ -222,6 +252,39 @@
         </div>
     </div>
 
+    <!-- MODAL EDITAR TRÂMITE DE SESSÃO -->
+    <div class="modal-overlay" id="modal-editar-tramite">
+        <div class="modal-card-large" style="max-width:600px;">
+            <button class="modal-close-x" id="btn-fechar-tramite">×</button>
+            <h2>Editar Trâmite da Sessão</h2>
+            <p class="modal-subtitle" id="tramite-info-sessao"></p>
+
+            <div style="display:flex; flex-direction:column; gap:14px; margin-top:10px;">
+                <div>
+                    <label style="font-size:0.78rem;font-weight:700;color:#046C4E;display:block;margin-bottom:6px;">Diagnóstico / Evolução Clínica</label>
+                    <textarea id="tramite-diagnostico" rows="3" style="width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:12px;outline:none;resize:vertical;font-family:'Poppins',sans-serif;font-size:0.85rem;" placeholder="Descrição do diagnóstico e evolução do paciente nesta sessão..."></textarea>
+                </div>
+                <div>
+                    <label style="font-size:0.78rem;font-weight:700;color:#046C4E;display:block;margin-bottom:6px;">Prescrição / Tratamento Aplicado</label>
+                    <textarea id="tramite-prescricao" rows="3" style="width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:12px;outline:none;resize:vertical;font-family:'Poppins',sans-serif;font-size:0.85rem;" placeholder="Procedimentos realizados, exercícios, dosagem..."></textarea>
+                </div>
+                <div>
+                    <label style="font-size:0.78rem;font-weight:700;color:#046C4E;display:block;margin-bottom:6px;">Observações Gerais</label>
+                    <textarea id="tramite-observacoes" rows="2" style="width:100%;padding:12px;border:2px solid #e5e7eb;border-radius:12px;outline:none;resize:vertical;font-family:'Poppins',sans-serif;font-size:0.85rem;" placeholder="Outras observações da sessão..."></textarea>
+                </div>
+                <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:12px;padding:14px;">
+                    <label style="font-size:0.78rem;font-weight:700;color:#C2410C;display:block;margin-bottom:6px;">📋 Plano para Próxima Sessão</label>
+                    <textarea id="tramite-plano-proximo" rows="3" style="width:100%;padding:12px;border:2px solid #fed7aa;border-radius:10px;outline:none;resize:vertical;font-family:'Poppins',sans-serif;font-size:0.85rem;background:white;" placeholder="O que será trabalhado na próxima sessão, metas, progressão..."></textarea>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:10px;margin-top:22px;">
+                <button id="btn-salvar-tramite" style="flex:1;padding:13px;background:#046C4E;color:white;border:none;border-radius:12px;font-weight:700;font-size:0.9rem;cursor:pointer;">Salvar Trâmite</button>
+                <button id="btn-cancelar-tramite" style="padding:13px 20px;background:#f3f4f6;color:#6B7280;border:none;border-radius:12px;font-weight:600;cursor:pointer;">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DELETAR CONTA PACIENTE -->
     <div class="modal-overlay" id="modal-excluir">
         <div class="modal-card-alert">
@@ -247,6 +310,7 @@
         </div>
     </div>
 
+    <script src="../assets/api.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

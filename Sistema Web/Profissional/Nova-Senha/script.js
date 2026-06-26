@@ -1,57 +1,42 @@
 function togglePass(id) {
-    const input = document.getElementById(id);
-    const icon = input.nextElementSibling;
-    if (input.type === 'password') {
-        input.type = 'text';
-        icon.textContent = 'visibility';
-    } else {
-        input.type = 'password';
-        icon.textContent = 'visibility_off';
-    }
+  const input = document.getElementById(id);
+  const icon = input.nextElementSibling;
+  input.type = input.type === 'password' ? 'text' : 'password';
+  icon.textContent = input.type === 'password' ? 'visibility_off' : 'visibility';
 }
 
 function showToast(message) {
-    const toast = document.getElementById('error-toast');
-    const toastMessage = document.getElementById('error-message');
-    
+  const toast = document.getElementById('error-toast');
+  const toastMessage = document.getElementById('error-message');
+  if (toast && toastMessage) {
     toastMessage.textContent = message;
     toast.classList.add('show');
-    
-    setTimeout(() => {
-        toast.classList.remove('show');
-    }, 4000);
+    setTimeout(() => toast.classList.remove('show'), 4000);
+  }
 }
 
-document.getElementById('form-nova-senha').addEventListener('submit', function(e) {
-    e.preventDefault();
+document.getElementById('form-nova-senha').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  const btn = this.querySelector('button[type="submit"]');
+  const password = document.getElementById('password').value;
+  const confirmPassword = document.getElementById('confirm-password').value;
 
-    const password = document.getElementById('password').value;
-    const confirmPassword = document.getElementById('confirm-password').value;
+  if (password !== confirmPassword) { showToast('As senhas não coincidem.'); return; }
+  if (password.length < 8) { showToast('Senha deve ter no mínimo 8 caracteres.'); return; }
 
-    if (password !== confirmPassword) {
-        showToast('As senhas inseridas não coincidem. Por favor, verifique.');
-        return;
-    }
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('token');
 
-    const API_URL = 'http://localhost:8080/api/profissional/atualizar-senha';
+  btn.textContent = 'Salvando...';
+  btn.disabled = true;
 
-    fetch(API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ novaSenha: password })
-    })
-    .then(response => {
-        if (response.ok) {
-            alert('Senha redefinida com sucesso! Você já pode acessar o sistema.');
-            window.location.href = '../login/index.html';
-        } else {
-            showToast('Erro ao redefinir senha. O link pode ter expirado.');
-        }
-    })
-    .catch(() => {
-        alert('Simulação: Senha atualizada com sucesso!\nRedirecionando para a tela de login...');
-        window.location.href = '../login/index.html';
-    });
+  try {
+    await apiRequest('POST', '/auth/reset-password', { token: token || '', novaSenha: password });
+    showNotification('Senha redefinida com sucesso!');
+    setTimeout(() => { window.location.href = '../login/index.html'; }, 1500);
+  } catch (err) {
+    showToast(err.message || 'Erro ao redefinir. O link pode ter expirado.');
+    btn.textContent = 'Salvar Nova Senha';
+    btn.disabled = false;
+  }
 });

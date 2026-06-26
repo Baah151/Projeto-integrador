@@ -355,20 +355,89 @@ input[type="number"]:focus {
     color: #9CA3AF;
 }
 
+/* ── ACORDEÃO DE DATAS ── */
 .published-day-block {
-    background: #FAFCF8;
+    background: #fff;
     border: 1px solid #E5E7EB;
     border-radius: 14px;
-    padding: 15px;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
 }
 
-.published-day-block h4 {
+.published-day-block:hover {
+    box-shadow: 0 2px 8px rgba(4, 108, 78, 0.08);
+}
+
+.accordion-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 16px;
+    cursor: pointer;
+    user-select: none;
+    background: #FAFCF8;
+    transition: background 0.15s;
+}
+
+.accordion-header:hover {
+    background: #F0FDF4;
+}
+
+.accordion-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.accordion-date-icon {
+    font-size: 18px;
     color: #046C4E;
-    font-size: 0.9rem;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #E5E7EB;
-    padding-bottom: 5px;
+}
+
+.accordion-date-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #111827;
+}
+
+.accordion-count {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #fff;
+    background: #046C4E;
+    padding: 2px 10px;
+    border-radius: 20px;
+}
+
+.accordion-chevron {
+    font-size: 20px;
+    color: #9CA3AF;
+    transition: transform 0.25s ease;
+}
+
+/* Corpo do acordeão — oculto por padrão */
+.accordion-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.2s;
+    padding: 0 16px;
+}
+
+/* Estado aberto */
+.accordion-aberto .accordion-chevron {
+    transform: rotate(90deg);
+    color: #046C4E;
+}
+
+.accordion-aberto .accordion-header {
+    background: #ECFDF5;
+    border-bottom: 1px solid #D1FAE5;
+}
+
+.accordion-aberto .accordion-body {
+    max-height: 1000px;
+    padding: 8px 16px 12px;
 }
 
 .published-item {
@@ -397,6 +466,91 @@ input[type="number"]:focus {
 }
 
 .btn-remove-published:hover {
+    color: #EF4444;
+}
+
+.time-slots-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.time-slot-btn {
+    padding: 9px 4px;
+    border: 2px solid #E5E7EB;
+    border-radius: 10px;
+    background: #FAFCF8;
+    color: #374151;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    font-family: 'Poppins', sans-serif;
+}
+
+.time-slot-btn:hover:not(.ocupado) {
+    border-color: #10B981;
+    background: #f0fdf4;
+    color: #046C4E;
+}
+
+.time-slot-btn.selected {
+    background: #046C4E;
+    border-color: #046C4E;
+    color: white;
+    transform: scale(1.03);
+    box-shadow: 0 3px 8px rgba(4,108,78,0.25);
+}
+
+.time-slot-btn.ocupado {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #d1d5db;
+    cursor: not-allowed;
+    text-decoration: line-through;
+}
+
+.selected-preview {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #046C4E;
+    background: #f0fdf4;
+    border: 1px solid #d1fae5;
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 4px;
+}
+
+.slot-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #FAFCF8;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    font-size: 0.85rem;
+    color: #374151;
+}
+
+.btn-remover-slot {
+    background: none;
+    border: none;
+    color: #9CA3AF;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+    line-height: 1;
+}
+
+.btn-remover-slot:hover {
     color: #EF4444;
 }
 

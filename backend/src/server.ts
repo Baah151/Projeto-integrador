@@ -1,121 +1,79 @@
+import 'dotenv/config';
 import express from 'express';
-import type { Request, Response } from 'express';
 import cors from 'cors';
-import pool from './database.js';
+import rateLimit from 'express-rate-limit';
+
+import authRoutes from './routes/auth.js';
+import mfaRoutes from './routes/mfa.js';
+import authPacienteRoutes from './routes/authPaciente.js';
+import pacienteAreaRoutes from './routes/pacienteArea.js';
+import profissionalRoutes from './routes/profissional.js';
+import pacientesRoutes from './routes/pacientes.js';
+import agendamentosRoutes from './routes/agendamentos.js';
+import financeiroRoutes from './routes/financeiro.js';
+import relatoriosRoutes from './routes/relatorios.js';
+import solicitacoesRoutes from './routes/solicitacoes.js';
+import historicoRoutes from './routes/historico.js';
+import documentosRoutes from './routes/documentos.js';
+import consultasRoutes from './routes/consultas.js';
+import sessaoRoutes from './routes/sessao.js';
+import tramitesRoutes from './routes/tramites.js';
+import { errorHandler } from './middleware/errorHandler.js';
+import { runMigrations } from './config/migrations.js';
+import { limparSlotsExpirados } from './services/agendamentosService.js';
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+const corsOrigins = process.env['CORS_ORIGIN']?.split(',') ?? ['http://localhost:3000', 'http://localhost:5173'];
+app.use(cors({ origin: corsOrigins, credentials: true }));
 
-// ==========================================
-// 1. ROTA DE TESTE (GET) - PROFISSIONAIS
-// ==========================================
-app.get('/profissionais', async (req: Request, res: Response): Promise<any> => {
-  try {
-    const resultado = await pool.query('SELECT * FROM profissional');
-    return res.json(resultado.rows);
-  } catch (error: any) {
-    console.error('Erro ao buscar profissionais:', error);
-    return res.status(500).json({ error: 'Erro no banco de dados' });
-  }
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Health check antes do rate limiter para nunca ser bloqueado
+app.get('/api/health', (_req, res) => {
+  res.status(200).json({ success: true, message: 'API funcionando', timestamp: new Date().toISOString() });
 });
 
-// ==========================================
-// 2. ROTA PARA CADASTRAR UM PACIENTE (POST)
-// ==========================================
-app.post('/pacientes', async (req: Request, res: Response): Promise<any> => {
-  try {
-    const corpo: any = req.body;
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: process.env['NODE_ENV'] === 'production' ? 300 : 2000,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { success: false, message: 'Muitas requisicoes. Tente novamente em 15 minutos.', error: 'RATE_LIMIT' },
+  skip: (req) => req.path === '/api/health',
+});
+app.use(limiter);
 
-    const queryText = `
-      INSERT INTO paciente (
-        nome, cpf, nascimento, email, telephone, senha, 
-        cep, logradouro, numero, bairro, complemento, cidade, estado
-      )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-      RETURNING id_paciente, nome, email;
-    `;
-    
-    const valores = [
-      corpo.nome, 
-      corpo.cpf, 
-      corpo.nascimento, 
-      corpo.email, 
-      corpo.telefone, 
-      corpo.senha, 
-      corpo.cep || null, 
-      corpo.logradouro || null, 
-      corpo.numero || null, 
-      corpo.bairro || null, 
-      corpo.complemento || null, 
-      corpo.cidade || null, 
-      corpo.estado || null
-    ];
-    
-    const resultado = await pool.query(queryText, valores);
+app.use('/api/auth', authRoutes);
+app.use('/api/mfa', mfaRoutes);
+app.use('/api/paciente/auth', authPacienteRoutes);
+app.use('/api/paciente', pacienteAreaRoutes);
+app.use('/api/profissional', profissionalRoutes);
+app.use('/api/pacientes', pacientesRoutes);
+app.use('/api/agendamentos', agendamentosRoutes);
+app.use('/api/financeiro', financeiroRoutes);
+app.use('/api/relatorios', relatoriosRoutes);
+app.use('/api/solicitacoes', solicitacoesRoutes);
+app.use('/api/historico', historicoRoutes);
+app.use('/api/documentos', documentosRoutes);
+app.use('/api/consultas', consultasRoutes);
+app.use('/api/sessao', sessaoRoutes);
+app.use('/api/tramites', tramitesRoutes);
 
-    return res.status(201).json({
-      mensagem: 'Paciente cadastrado com sucesso!',
-      paciente: resultado.rows[0]
-    });
-  } catch (error: any) {
-    console.error('Erro ao cadastrar paciente:', error);
-    if (error.code === '23505') {
-      return res.status(400).json({ error: 'Este CPF ou E-mail de paciente já está cadastrado.' });
-    }
-    return res.status(500).json({ error: 'Erro interno no servidor ao salvar o paciente.' });
-  }
+app.use((_req, res) => {
+  res.status(404).json({ success: false, message: 'Rota nao encontrada', error: 'NOT_FOUND', timestamp: new Date().toISOString() });
 });
 
-// ==========================================
-// 3. ROTA PARA CADASTRAR UM PROFISSIONAL (POST)
-// ==========================================
-app.post('/profissionais', async (req: Request, res: Response): Promise<any> => {
-  try {
-    const corpo: any = req.body;
+app.use(errorHandler);
 
-    const queryText = `
-      INSERT INTO profissional (
-        nome, cpf, nascimento, email, telefone, senha, 
-        cep, logradouro, numero, bairro, complemento, cidade, estado
-      )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-      RETURNING id_profissional, nome, email;
-    `;
-    
-    const valores = [
-      corpo.nome,
-      corpo.cpf,
-      corpo.nascimento,
-      corpo.email,
-      corpo.telefone,
-      corpo.senha,
-      corpo.cep || null,
-      corpo.logradouro || null,
-      corpo.numero || null,
-      corpo.bairro || null,
-      corpo.complemento || null,
-      corpo.cidade || null,
-      corpo.estado || null
-    ];
-    
-    const resultado = await pool.query(queryText, valores);
-
-    return res.status(201).json({
-      mensagem: 'Profissional cadastrado com sucesso!',
-      profissional: resultado.rows[0]
-    });
-  } catch (error: any) {
-    console.error('Erro ao cadastrar profissional:', error);
-    if (error.code === '23505') {
-      return res.status(400).json({ error: 'Este CPF ou E-mail já está cadastrado no sistema.' });
-    }
-    return res.status(500).json({ error: 'Erro interno ao salvar os dados do profissional.' });
-  }
+const PORT = Number(process.env['SERVER_PORT'] ?? 3000);
+app.listen(PORT, async () => {
+  console.log(`Servidor rodando na porta ${PORT}`);
+  console.log(`Health check: http://localhost:${PORT}/api/health`);
+  await runMigrations();
+  await limparSlotsExpirados();
+  console.log('Slots expirados removidos da agenda.');
 });
 
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Backend ativo e integrado ao Supabase na porta ${PORT}`);
-});
+export default app;
