@@ -1,100 +1,103 @@
-🌿 Site de Fisioterapia e Pilates
+# 🏥 Sistema de Clínica Luana - Fisioterapia e Pilates
 
-Projeto de um site institucional desenvolvido para uma profissional da área de
-Fisioterapia e Pilates, com o objetivo de apresentar serviços, disponibilizar
-informações de contato e facilitar o agendamento de consultas.
-O projeto foi estruturado de forma modular, permitindo futuras expansões e
-integrações com serviços externos.
+Projeto de um sistema web completo desenvolvido para uma profissional da área de Fisioterapia e Pilates, com o objetivo de gerenciar pacientes, agendar consultas, controlar financeiro e facilitar o atendimento domiciliar.
+
+O projeto foi estruturado de forma modular, permitindo futuras expansões e integrações com serviços externos.
 
 ---
 
-🚀 Tecnologias Utilizadas
+## 🚀 Tecnologias Utilizadas
 
-🎨 Front-end
+### 🎨 Front-end
 * HTML5 – Estruturação das páginas
 * CSS3 – Estilização e layout responsivo
-* JavaScript – Interatividade da aplicação
-* React (via CDN) – Construção da interface de forma componentizada
-* Babel Standalone – Permite a utilização de JSX diretamente no navegador
-* Google Fonts – Padronização e melhoria da tipografia
+* JavaScript Vanilla – Interatividade da aplicação
 
-⚙️ Back-end (em planejamento)
+### ⚙️ Back-end
 * Node.js – Ambiente de execução JavaScript no servidor
 * Express.js – Framework para criação de APIs REST
-* Axios – Comunicação entre serviços via HTTP
-* dotenv – Gerenciamento de variáveis de ambiente
+* TypeScript – Tipagem estática e segurança de tipos
 
-🗄️ Banco de Dados
+### 🗄️ Banco de Dados
 * PostgreSQL – Sistema de gerenciamento de banco de dados relacional
-* DBeaver – Interface gráfica para administração do banco de dados
+* Supabase – PostgreSQL na nuvem
 
 ---
 
-🎯 Funcionalidades
-* Página inicial com apresentação institucional
-* Seção de serviços oferecidos
-* Seção de benefícios e diferenciais
-* Área de contato
-* Botão de redirecionamento direto para WhatsApp
-* Layout responsivo para diferentes dispositivos
-* Estrutura preparada para agendamento automatizado
+## 🎯 Funcionalidades
+
+### Área do Paciente
+* Cadastro e login com validação completa
+* Agendamento de consultas (Fisioterapia, Pilates, Ambos)
+* Visualizar próximas sessões e histórico completo
+* Pagamento via PIX ou Dinheiro
+* Upload e envio de documentos
+* Visualizar prescrições e pendências
+* Editar perfil e dados pessoais
+
+### Área do Profissional
+* Dashboard com resumo de agendamentos e financeiro
+* Listar pacientes com busca avançada (nome, CPF, data nascimento)
+* Ver histórico completo de cada paciente
+* Confirmar, remarcar ou cancelar agendamentos
+* Registrar consultas realizadas com prescrições
+* Avaliar documentos enviados pelos pacientes
+* Controlar pagamentos (PIX e Dinheiro)
+* Gerar relatórios de consultas e financeiro
 
 ---
 
-📖 Bibliotecas e Recursos Utilizados
-* React (CDN) – Organização da interface em componentes
-* Babel Standalone – Transpilação de código JSX no navegador
-* Google Fonts – Tipografia personalizada
-* Links da API do WhatsApp (wa.me / api.whatsapp.com) – Integração para contato
-  e agendamento
-* Node.js e Express.js – Planejados para implementação das regras de negócio
-* Google Calendar API (planejado) – Automação e gerenciamento de agendamentos
-
----
-
-🛠️ Ferramentas de Desenvolvimento
+## 🛠️ Ferramentas de Desenvolvimento
 * Visual Studio Code – Editor de código-fonte
 * Git – Controle de versionamento
 * GitHub – Hospedagem do repositório
-* GitHub Pages – Publicação do front-end
-* DBeaver – Administração e visualização do banco de dados
 
 ---
 
-🏗️ Arquitetura do Projeto
+## 🏗️ Arquitetura do Projeto
 
-O projeto segue uma arquitetura baseada na separação entre front-end e back-end,
-permitindo maior organização, manutenção e escalabilidade.
+O projeto segue uma arquitetura baseada na separação entre front-end e back-end, permitindo maior organização, manutenção e escalabilidade.
 
-O front-end é responsável pela interface do usuário, enquanto o back-end,
-implementado com Node.js, será responsável pelo gerenciamento de dados,
-integrações e automações.
+O front-end é responsável pela interface do usuário, enquanto o back-end, implementado com Node.js + Express + TypeScript, é responsável pelo gerenciamento de dados, autenticação, integração de pagamentos e automações.
 
-O banco de dados PostgreSQL armazena as informações de pacientes, profissionais,
-agendamentos, consultas, documentos, histórico e disponibilidade de agenda,
-seguindo um modelo relacional com integridade referencial via chaves estrangeiras.
+O banco de dados PostgreSQL (hospedado no Supabase) armazena as informações de pacientes, profissionais, agendamentos, consultas, documentos, histórico, financeiro e pendências, seguindo um modelo relacional com integridade referencial via chaves estrangeiras.
 
 ---
 
-🗄️ Estrutura do Banco de Dados
+## 🗄️ Estrutura do Banco de Dados
 
 O banco sistema_clinica é composto pelas seguintes tabelas:
 
-| Tabela                  | Descrição                                         |
-|-------------------------|---------------------------------------------------|
-| paciente                | Dados cadastrais dos pacientes                    |
-| profissional            | Dados cadastrais dos profissionais de saúde       |
-| agendamento             | Consultas agendadas entre paciente e profissional |
-| consulta                | Diagnóstico e prescrição após a consulta          |
-| documento               | Arquivos e exames enviados pelo paciente          |
-| financeiro              | Controle de pagamentos das consultas              |
-| historico               | Histórico clínico do paciente                     |
-| disponibilidade_agenda  | Horários disponíveis de cada profissional         |
+| Tabela | Descrição |
+|--------|-----------|
+| paciente | Dados cadastrais dos pacientes |
+| profissional | Dados cadastrais dos profissionais de saúde |
+| administrador | Usuários com acesso administrativo |
+| agendamento | Consultas agendadas entre paciente e profissional |
+| consulta | Pacote de sessões de tratamento |
+| sessao_consulta | Cada sessão individual com descrição e prescrição |
+| documento | Arquivos e exames enviados pelo paciente |
+| prescricao | Prescrições médicas e exercícios recomendados |
+| financeiro | Controle de pagamentos das consultas |
+| historico_consultas | Histórico clínico do paciente |
+| pendencias | Pendências do paciente (pagamentos, documentos) |
 
 ---
 
-📌 Status do Projeto
-* ✅ Front-end funcional
-* ✅ Banco de dados modelado e implementado
-* 🚧 Back-end em fase de planejamento e implementação
-* 🚀 Estrutura preparada para futuras integrações e automações
+## 📌 Status do Projeto
+
+* ✅ Front-end funcional e responsivo
+* ✅ Back-end completo e implementado
+* ✅ Banco de dados modelado, implementado e integrado
+* ✅ Autenticação com JWT (3 tipos: Paciente, Profissional, Admin)
+* ✅ CRUD completo de pacientes, agendamentos e consultas
+* ✅ Sistema de pagamentos (PIX + Dinheiro)
+* ✅ Histórico por sessões com prescrições
+* ✅ Filtro avançado de pacientes
+* ✅ Dashboard profissional com resumos
+* ✅ Controle financeiro integrado
+* ✅ Relatórios de consultas e financeiro
+* ✅ Upload de documentos
+* ✅ Sistema responsivo (Mobile, Tablet, Desktop)
+* ✅ Backend publicado no Render
+* 🚀 Frontend pendente de publicação
