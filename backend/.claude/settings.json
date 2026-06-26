@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/projetos faculdade/projeto integrador/Projeto-integrador/**)"
+    ],
+    "additionalDirectories": [
+      "c:\\projetos faculdade\\projeto integrador\\Projeto-integrador\\Sistema Web\\Profissional\\Painel",
+      "c:\\projetos faculdade\\projeto integrador\\Projeto-integrador\\Sistema Web\\Profissional\\Pacientes",
+      "c:\\projetos faculdade\\projeto integrador\\Projeto-integrador\\Sistema Web\\Profissional\\Relatórios",
+      "c:\\projetos faculdade\\projeto integrador\\Projeto-integrador\\Sistema Web\\Profissional\\Financeiro"
+    ]
+  }
+}

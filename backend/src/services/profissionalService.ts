@@ -1,3 +1,4 @@
+import bcrypt from 'bcryptjs';
 import pool from '../config/database.js';
 
 export async function findById(id: number) {
@@ -17,9 +18,24 @@ export async function update(id: number, data: Record<string, unknown>) {
   const values: unknown[] = [];
   let idx = 1;
 
+  // Troca de senha (requer senha_atual + nova_senha)
+  if (data['nova_senha'] && data['senha_atual']) {
+    const res = await pool.query(
+      'SELECT senha FROM profissional WHERE id_profissional = $1',
+      [id]
+    );
+    const row = res.rows[0] as { senha: string } | undefined;
+    if (!row) throw new Error('Profissional nao encontrado');
+    const valida = await bcrypt.compare(String(data['senha_atual']), row.senha);
+    if (!valida) throw new Error('Senha atual incorreta');
+    const hash = await bcrypt.hash(String(data['nova_senha']), 10);
+    fields.push(`senha = $${idx++}`);
+    values.push(hash);
+  }
+
   const allowed = ['nome', 'telefone', 'cep', 'logradouro', 'numero', 'bairro', 'complemento', 'cidade', 'estado'];
   for (const key of allowed) {
-    if (key in data) {
+    if (key in data && data[key] !== '' && data[key] !== undefined) {
       fields.push(`${key} = $${idx++}`);
       values.push(data[key]);
     }
@@ -33,9 +49,9 @@ export async function update(id: number, data: Record<string, unknown>) {
      RETURNING id_profissional, nome, email, telefone, cidade, estado`,
     values
   );
-  const row = result.rows[0];
-  if (!row) throw new Error('Profissional nao encontrado');
-  return row;
+  const updated = result.rows[0];
+  if (!updated) throw new Error('Profissional nao encontrado');
+  return updated;
 }
 
 export async function getDashboard(id: number) {

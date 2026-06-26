@@ -265,6 +265,32 @@ body {
     font-size: 20px;
 }
 
+.btn-limpar-dados {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #DC2626;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 0.88rem;
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: 0.3s;
+    white-space: nowrap;
+}
+
+.btn-limpar-dados:hover {
+    background-color: #b91c1c;
+    transform: translateY(-2px);
+}
+
+.btn-limpar-dados .material-symbols-outlined {
+    font-size: 20px;
+}
+
 .table-container {
     background-color: white;
     padding: 20px;

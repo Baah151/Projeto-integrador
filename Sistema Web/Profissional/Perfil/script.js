@@ -10,24 +10,30 @@ function gerenciarMenuMobile() {
   backdrop.addEventListener('click', fechar);
 }
 
+function set(id, valor) {
+  const el = document.getElementById(id);
+  if (el) el.value = valor || '';
+}
+
+function get(id) {
+  return document.getElementById(id)?.value || '';
+}
+
 function popularFormulario(p) {
-  const campos = ['nome', 'email', 'telefone', 'cpf', 'nascimento', 'cep', 'logradouro', 'numero', 'bairro', 'complemento', 'cidade', 'estado', 'especialidade', 'registro'];
-  campos.forEach(c => {
-    const el = document.getElementById(`perfil-${c}`) || document.getElementById(c);
-    if (el) el.value = p[c] || '';
-  });
-  const nomeHeader = document.getElementById('perfil-nome-header') || document.getElementById('nome-header');
-  if (nomeHeader) nomeHeader.textContent = p.nome || '--';
-  const emailHeader = document.getElementById('perfil-email-header') || document.getElementById('email-header');
-  if (emailHeader) emailHeader.textContent = p.email || '--';
+  set('email', p.email);
+  set('telefone', p.telefone);
+  set('cep', p.cep);
+  set('rua', p.logradouro);
+  set('numero', p.numero);
+  set('complemento', p.complemento);
+  set('bairro', p.bairro);
+  set('cidade', p.cidade);
+  set('uf', p.estado);
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
   if (!verificarAutenticacao()) return;
   gerenciarMenuMobile();
-
-  const dropdownBody = document.getElementById('dropdown-body');
-  if (dropdownBody) dropdownBody.innerHTML = '<div class="dropdown-item" style="text-align:center;color:#9ca3af;">Nenhuma notificação.</div>';
 
   const bell = document.getElementById('bell-button');
   const notiDropdown = document.getElementById('noti-dropdown');
@@ -42,11 +48,14 @@ window.addEventListener('DOMContentLoaded', async () => {
   try {
     const profissional = await obterProfissional(profissionalId);
     popularFormulario(profissional);
+    const emailInput = document.getElementById('email');
+    if (emailInput) emailInput.readOnly = true;
   } catch (err) {
     showNotification(err.message || 'Erro ao carregar perfil.', 'error');
   }
 
-  const cepInput = document.getElementById('perfil-cep') || document.getElementById('cep');
+  // Busca automática pelo CEP (ViaCEP)
+  const cepInput = document.getElementById('cep');
   if (cepInput) {
     cepInput.addEventListener('blur', async () => {
       const cep = cepInput.value.replace(/\D/g, '');
@@ -55,45 +64,95 @@ window.addEventListener('DOMContentLoaded', async () => {
           const res = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
           const dados = await res.json();
           if (!dados.erro) {
-            const set = (suf, v) => {
-              const e = document.getElementById(`perfil-${suf}`) || document.getElementById(suf);
-              if (e) e.value = v;
-            };
-            set('logradouro', dados.logradouro || '');
-            set('bairro', dados.bairro || '');
-            set('cidade', dados.localidade || '');
-            set('estado', dados.uf || '');
+            set('rua', dados.logradouro);
+            set('bairro', dados.bairro);
+            set('cidade', dados.localidade);
+            set('uf', dados.uf);
           }
         } catch {}
       }
     });
   }
 
-  const form = document.getElementById('form-perfil') || document.getElementById('perfil-form');
-  if (form) {
-    form.addEventListener('submit', async (e) => {
+  // Form 1: Contatos e Segurança (telefone + senha)
+  const formContatos = document.getElementById('form-dados-seguranca');
+  if (formContatos) {
+    formContatos.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const btn = form.querySelector('button[type="submit"]');
+      const btn = formContatos.querySelector('button[type="submit"]');
       if (btn) { btn.textContent = 'Salvando...'; btn.disabled = true; }
 
-      const dados = {};
-      const campos = ['nome', 'email', 'telefone', 'cpf', 'nascimento', 'cep', 'logradouro', 'numero', 'bairro', 'complemento', 'cidade', 'estado', 'especialidade', 'registro'];
-      campos.forEach(c => {
-        const el = document.getElementById(`perfil-${c}`) || document.getElementById(c);
-        if (el) dados[c] = el.value;
-      });
+      const senhaAtual = get('senha-atual');
+      const novaSenha = get('nova-senha');
+      const confirmaSenha = get('confirma-senha');
+
+      if (novaSenha && novaSenha !== confirmaSenha) {
+        showNotification('As senhas não coincidem.', 'error');
+        if (btn) { btn.textContent = 'Salvar Dados'; btn.disabled = false; }
+        return;
+      }
+
+      const dados = { telefone: get('telefone') };
+      if (novaSenha && senhaAtual) {
+        dados.senha_atual = senhaAtual;
+        dados.nova_senha = novaSenha;
+      }
 
       try {
         await atualizarProfissional(profissionalId, dados);
-        showNotification('Perfil atualizado com sucesso!');
-
-        const nomeHeader = document.getElementById('perfil-nome-header') || document.getElementById('nome-header');
-        if (nomeHeader && dados.nome) nomeHeader.textContent = dados.nome;
+        showNotification('Dados atualizados com sucesso!');
+        document.getElementById('senha-atual').value = '';
+        document.getElementById('nova-senha').value = '';
+        document.getElementById('confirma-senha').value = '';
       } catch (err) {
         showNotification(err.message || 'Erro ao salvar.', 'error');
       } finally {
-        if (btn) { btn.textContent = 'Salvar Alterações'; btn.disabled = false; }
+        if (btn) { btn.textContent = 'Salvar Dados'; btn.disabled = false; }
       }
     });
   }
+
+  // Form 2: Endereço
+  const formEndereco = document.getElementById('form-endereco');
+  if (formEndereco) {
+    formEndereco.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = formEndereco.querySelector('button[type="submit"]');
+      if (btn) { btn.textContent = 'Salvando...'; btn.disabled = true; }
+
+      const dados = {
+        cep: get('cep'),
+        logradouro: get('rua'),
+        numero: get('numero'),
+        complemento: get('complemento'),
+        bairro: get('bairro'),
+        cidade: get('cidade'),
+        estado: get('uf'),
+      };
+
+      try {
+        await atualizarProfissional(profissionalId, dados);
+        showNotification('Endereço atualizado com sucesso!');
+      } catch (err) {
+        showNotification(err.message || 'Erro ao salvar.', 'error');
+      } finally {
+        if (btn) { btn.textContent = 'Atualizar Endereço'; btn.disabled = false; }
+      }
+    });
+  }
+
+  // Toggle visibilidade das senhas
+  document.querySelectorAll('.eye-icon').forEach(icon => {
+    icon.addEventListener('click', () => {
+      const input = icon.previousElementSibling;
+      if (!input) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.textContent = 'visibility_off';
+      } else {
+        input.type = 'password';
+        icon.textContent = 'visibility';
+      }
+    });
+  });
 });

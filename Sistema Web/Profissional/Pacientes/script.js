@@ -59,6 +59,31 @@ async function carregarPacientes() {
   }
 }
 
+async function limparPacientesTeste() {
+  if (!confirm('⚠️ ATENÇÃO!\n\nIsso vai DELETAR TODOS os pacientes cadastrados.\nEsta ação NÃO pode ser desfeita!\n\nTem certeza?')) return;
+  if (!confirm('⚠️ ÚLTIMA CONFIRMAÇÃO!\n\nVocê REALMENTE quer deletar TODOS os pacientes?')) return;
+
+  const btn = document.getElementById('btn-limpar-pacientes');
+  if (btn) { btn.textContent = 'Deletando...'; btn.disabled = true; }
+
+  try {
+    const lista = await listarPacientes();
+    for (const p of lista) {
+      await deletarPaciente(p.id_paciente);
+    }
+    showNotification(`${lista.length} paciente(s) deletado(s) com sucesso!`);
+    pacientesLista = [];
+    renderizarTabela([]);
+  } catch (err) {
+    showNotification(err.message || 'Erro ao deletar pacientes.', 'error');
+  } finally {
+    if (btn) {
+      btn.innerHTML = '<span class="material-symbols-outlined">delete_sweep</span> Limpar Dados de Teste';
+      btn.disabled = false;
+    }
+  }
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   if (!verificarAutenticacao()) return;
   gerenciarMenuMobile();
@@ -91,4 +116,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (searchInput) searchInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') executarBusca(); });
 
   await carregarPacientes();
+
+  document.getElementById('btn-limpar-pacientes')?.addEventListener('click', limparPacientesTeste);
 });

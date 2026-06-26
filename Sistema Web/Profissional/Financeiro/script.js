@@ -24,13 +24,11 @@ let sessoesLista = [];
 
 function badgeStatus(s) {
   if (s.status_pagamento === 'Pago') return '<span class="badge-pago">Pago</span>';
-  if (s.pago_apos_sessao) return '<span class="badge-apos">Pós-Sessão</span>';
   return '<span class="badge-pendente-fin">Pendente</span>';
 }
 
 function rowClass(s) {
   if (s.status_pagamento === 'Pago') return 'row-pago';
-  if (s.pago_apos_sessao) return 'row-apos';
   return 'row-pendente';
 }
 
@@ -87,16 +85,13 @@ function renderizarSessoes(lista) {
 
 function atualizarDashboard() {
   const pago = sessoesLista.filter(s => s.status_pagamento === 'Pago');
-  const apos = sessoesLista.filter(s => s.status_pagamento !== 'Pago' && s.pago_apos_sessao);
-  const pendente = sessoesLista.filter(s => s.status_pagamento !== 'Pago' && !s.pago_apos_sessao);
+  const pendente = sessoesLista.filter(s => s.status_pagamento !== 'Pago');
 
   const somaBRL = (arr) => arr.reduce((acc, s) => acc + parseFloat(s.valor_sessao || 0), 0);
   const el = (id) => document.getElementById(id);
 
   if (el('total-pago')) el('total-pago').textContent = formatarBRL(somaBRL(pago));
   if (el('cnt-pago')) el('cnt-pago').textContent = `${pago.length} sessão(ões)`;
-  if (el('total-apos')) el('total-apos').textContent = formatarBRL(somaBRL(apos));
-  if (el('cnt-apos')) el('cnt-apos').textContent = `${apos.length} sessão(ões)`;
   if (el('total-pendente')) el('total-pendente').textContent = formatarBRL(somaBRL(pendente));
   if (el('cnt-pendente')) el('cnt-pendente').textContent = `${pendente.length} sessão(ões)`;
   if (el('total-faturamento')) el('total-faturamento').textContent = formatarBRL(somaBRL(sessoesLista));
