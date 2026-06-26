@@ -92,9 +92,20 @@
 
             <!-- Barra de busca + filtros -->
             <div class="filter-bar">
-                <div class="search-box">
-                    <span class="material-symbols-outlined search-icon">search</span>
-                    <input type="text" id="busca-input" placeholder="Buscar por CON-0001 ou nome do paciente...">
+                <div class="filter-bar-top">
+                    <div class="search-box">
+                        <span class="material-symbols-outlined search-icon">search</span>
+                        <input type="text" id="busca-input" placeholder="Buscar por CON-0001 ou nome do paciente...">
+                    </div>
+                    <div class="sort-box">
+                        <span class="material-symbols-outlined sort-icon">swap_vert</span>
+                        <select id="ordem-select" class="sort-select">
+                            <option value="data_desc">Mais recente primeiro</option>
+                            <option value="data_asc">Mais antiga primeiro</option>
+                            <option value="tramites_desc">Mais trâmites</option>
+                            <option value="tramites_asc">Menos trâmites</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="status-pills">
                     <button class="pill pill-ativo" data-status="todos">Todos</button>

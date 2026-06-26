@@ -55,13 +55,15 @@ export async function update(id: number, data: Record<string, unknown>) {
 }
 
 export async function getDashboard(id: number) {
-  const [agendados, finalizados, pacientes, receita] = await Promise.all([
+  const [hoje, solicitacoes, pacientes, receita] = await Promise.all([
     pool.query(
-      `SELECT COUNT(*) AS total FROM agendamento WHERE id_profissional = $1 AND status = 'Agendado'`,
+      `SELECT COUNT(*) AS total FROM agendamento
+       WHERE id_profissional = $1 AND data_consulta = CURRENT_DATE AND status NOT IN ('Cancelado')`,
       [id]
     ),
     pool.query(
-      `SELECT COUNT(*) AS total FROM agendamento WHERE id_profissional = $1 AND status = 'Finalizado'`,
+      `SELECT COUNT(*) AS total FROM agendamento
+       WHERE id_profissional = $1 AND status = 'Agendado' AND id_reagendado_de IS NULL`,
       [id]
     ),
     pool.query(
@@ -79,8 +81,8 @@ export async function getDashboard(id: number) {
   ]);
 
   return {
-    consultas_agendadas: Number((agendados.rows[0] as { total: string } | undefined)?.total ?? 0),
-    consultas_finalizadas: Number((finalizados.rows[0] as { total: string } | undefined)?.total ?? 0),
+    consultas_hoje: Number((hoje.rows[0] as { total: string } | undefined)?.total ?? 0),
+    solicitacoes_pendentes: Number((solicitacoes.rows[0] as { total: string } | undefined)?.total ?? 0),
     total_pacientes: Number((pacientes.rows[0] as { total: string } | undefined)?.total ?? 0),
     receita_total: Number((receita.rows[0] as { total: string } | undefined)?.total ?? 0),
   };

@@ -53,50 +53,71 @@ export async function getByPaciente(req: Request, res: Response): Promise<void> 
 export async function getConsultas(req: Request, res: Response): Promise<void> {
   try {
     const profissionalId = req.profissional!.id;
-    const { status, busca } = req.query as { status?: string; busca?: string };
+    const { status, busca, ordem } = req.query as { status?: string; busca?: string; ordem?: string };
 
-    const conditions: string[] = ['a.id_profissional = $1'];
+    const outerConditions: string[] = [];
     const values: unknown[] = [profissionalId];
     let idx = 2;
 
     if (status === 'em_andamento') {
-      conditions.push(`a.status IN ('Agendado', 'Confirmado', 'Pendente')`);
+      outerConditions.push(`n.status IN ('Agendado', 'Confirmado', 'Pendente')`);
     } else if (status === 'finalizada') {
-      conditions.push(`a.status = 'Finalizado'`);
+      outerConditions.push(`n.status = 'Finalizado'`);
     } else if (status === 'cancelada') {
-      conditions.push(`a.status = 'Cancelado'`);
+      outerConditions.push(`n.status = 'Cancelado'`);
     } else if (status === 'reagendada') {
-      conditions.push(`a.id_reagendado_de IS NOT NULL`);
+      outerConditions.push(`n.id_reagendado_de IS NOT NULL`);
     }
 
     if (busca) {
-      conditions.push(`(LOWER(p.nome) LIKE $${idx} OR LPAD(a.id_agendamento::text, 4, '0') LIKE $${idx})`);
+      outerConditions.push(
+        `(LOWER(p.nome) LIKE $${idx} OR LOWER('CON-' || LPAD(n.num_consulta::text, 4, '0')) LIKE $${idx})`
+      );
       values.push(`%${(busca as string).toLowerCase()}%`);
       idx++;
     }
 
+    const whereExtra = outerConditions.length > 0 ? `AND ${outerConditions.join(' AND ')}` : '';
+
+    const orderBy =
+      ordem === 'data_asc'      ? 'n.num_consulta ASC' :
+      ordem === 'tramites_desc' ? 'COUNT(t.id_tramite) DESC, n.num_consulta DESC' :
+      ordem === 'tramites_asc'  ? 'COUNT(t.id_tramite) ASC, n.num_consulta DESC' :
+      /* padrão / data_desc */    'n.num_consulta DESC';
+
     const result = await pool.query(
-      `SELECT
-         a.id_agendamento,
-         'CON-' || LPAD(a.id_agendamento::text, 4, '0') AS codigo,
-         a.data_consulta, a.horario, a.status, a.observacoes,
-         a.id_reagendado_de,
+      `WITH numerados AS (
+         SELECT
+           a.id_agendamento, a.data_consulta, a.horario, a.status,
+           a.observacoes, a.id_reagendado_de, a.id_paciente,
+           ROW_NUMBER() OVER (ORDER BY a.id_agendamento ASC) AS num_consulta
+         FROM agendamento a
+         WHERE a.id_profissional = $1
+       )
+       SELECT
+         n.id_agendamento,
+         'CON-' || LPAD(n.num_consulta::text, 4, '0') AS codigo,
+         n.data_consulta, n.horario, n.status, n.observacoes,
+         n.id_reagendado_de,
+         nr.num_consulta AS num_reagendado_de,
          p.id_paciente, p.nome AS nome_paciente, p.telefone AS telefone_paciente,
          COUNT(t.id_tramite) AS num_tramites,
          MAX(t.criado_em) AS ultimo_tramite_em,
          s.id_sessao, s.valor_sessao, s.forma_pagamento, s.status_pagamento,
          s.descricao_realizada, s.prescricao_texto
-       FROM agendamento a
-       JOIN paciente p ON a.id_paciente = p.id_paciente
-       LEFT JOIN tramite t ON t.id_agendamento = a.id_agendamento
-       LEFT JOIN sessao_consulta s ON s.id_agendamento = a.id_agendamento
-       WHERE ${conditions.join(' AND ')}
-       GROUP BY a.id_agendamento, a.data_consulta, a.horario, a.status, a.observacoes,
-                a.id_reagendado_de,
+       FROM numerados n
+       JOIN paciente p ON n.id_paciente = p.id_paciente
+       LEFT JOIN numerados nr ON nr.id_agendamento = n.id_reagendado_de
+       LEFT JOIN tramite t ON t.id_agendamento = n.id_agendamento
+       LEFT JOIN sessao_consulta s ON s.id_agendamento = n.id_agendamento
+       WHERE 1=1 ${whereExtra}
+       GROUP BY n.id_agendamento, n.data_consulta, n.horario, n.status,
+                n.observacoes, n.id_reagendado_de, n.num_consulta,
+                nr.num_consulta,
                 p.id_paciente, p.nome, p.telefone,
                 s.id_sessao, s.valor_sessao, s.forma_pagamento, s.status_pagamento,
                 s.descricao_realizada, s.prescricao_texto
-       ORDER BY a.data_consulta DESC, a.horario ASC`,
+       ORDER BY ${orderBy}`,
       values
     );
 

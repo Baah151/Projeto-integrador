@@ -20,7 +20,7 @@ export async function getAll(req: Request, res: Response): Promise<void> {
               p.telefone AS telefone_paciente
        FROM agendamento a
        JOIN paciente p ON a.id_paciente = p.id_paciente
-       WHERE a.id_profissional = $1 AND a.status = 'Agendado'
+       WHERE a.id_profissional = $1 AND a.status = 'Agendado' AND a.id_reagendado_de IS NULL
        ORDER BY a.data_consulta ASC, a.horario ASC`,
       [profissionalId]
     );

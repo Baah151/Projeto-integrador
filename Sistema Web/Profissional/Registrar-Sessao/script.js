@@ -107,7 +107,7 @@ async function carregarSlots(data) {
   }
 }
 
-async function ativarProximaSemana() {
+function ativarProximaSemana() {
   const dataBase = agendamento?.data_consulta?.substring(0, 10);
   const horaBase = agendamento?.horario ? String(agendamento.horario).substring(0, 5) : null;
   if (!dataBase || !horaBase) {
@@ -118,24 +118,21 @@ async function ativarProximaSemana() {
   const proxData = adicionarDias(dataBase, 7);
   const dataInput = document.getElementById('reagendar_data');
   const horaInput = document.getElementById('reagendar_hora');
-
-  dataInput.value = proxData;
-  await carregarSlots(proxData);
-
-  // Auto-selecionar o mesmo horário se disponível
-  await new Promise(r => setTimeout(r, 100));
   const container = document.getElementById('reagendar-slots-container');
-  const btnHora = Array.from(container?.querySelectorAll('.slot-livre') || [])
-    .find(b => b.textContent.trim() === horaBase);
 
-  if (btnHora) {
-    btnHora.click();
-  } else {
-    // Se o horário não estiver na lista, preenche hidden direto
-    horaInput.value = horaBase;
-    atualizarPreview();
-    showNotification(`Horário ${horaBase} não encontrado na agenda de ${formatarDataBR(proxData)}. Será agendado assim mesmo.`, 'warning');
+  // Preenche diretamente sem depender de slots na agenda
+  dataInput.value = proxData;
+  horaInput.value = horaBase;
+
+  if (container) {
+    container.innerHTML = `
+      <p class="slots-hint" style="text-align:left;color:#046C4E;">
+        <span class="material-symbols-outlined" style="font-size:14px;vertical-align:middle;">check_circle</span>
+        Horário reservado: ${horaBase}
+      </p>`;
   }
+
+  atualizarPreview();
 }
 
 document.addEventListener('DOMContentLoaded', async () => {

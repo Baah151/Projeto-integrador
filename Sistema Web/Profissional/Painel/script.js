@@ -41,8 +41,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (dash) {
       const el = (id) => document.getElementById(id);
       if (el('count-pacientes')) el('count-pacientes').textContent = dash.total_pacientes ?? 0;
-      if (el('count-consultas')) el('count-consultas').textContent = dash.consultas_agendadas ?? 0;
-      if (el('count-solicitacoes')) el('count-solicitacoes').textContent = dash.consultas_finalizadas ?? 0;
+      if (el('count-consultas')) el('count-consultas').textContent = dash.consultas_hoje ?? 0;
+      if (el('count-solicitacoes')) el('count-solicitacoes').textContent = dash.solicitacoes_pendentes ?? 0;
     }
   } catch { /* dashboard é adicional, não crítico */ }
 

@@ -249,14 +249,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     window.location.href = '../Registrar-Sessao/index.html';
   });
 
-  // --- REAGENDAR → Registrar-Sessao com pagamento + reagendamento pré-ativado ---
-  document.getElementById('btn-trigger-reagendar')?.addEventListener('click', () => {
-    if (!agendamentoSelecionado) return;
-    localStorage.setItem('sessao_agendamento', JSON.stringify(agendamentoSelecionado));
-    localStorage.setItem('sessao_modo', 'reagendar');
-    window.location.href = '../Registrar-Sessao/index.html';
-  });
-
   // --- CANCELAR ---
   const modalCancelar = document.getElementById('modal-sub-cancelar');
   document.getElementById('btn-trigger-cancelar')?.addEventListener('click', () => {

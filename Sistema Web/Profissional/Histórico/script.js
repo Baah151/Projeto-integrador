@@ -60,6 +60,7 @@ let consultasLista = [];
 let consultaSelecionada = null;
 let filtroAtivo = 'todos';
 let buscaAtiva = '';
+let ordemAtiva = 'data_desc';
 
 // ─── Renderizar lista de consultas ────────────────────────────────
 
@@ -172,7 +173,8 @@ async function selecionarConsulta(consulta) {
   const reagendouDe = document.getElementById('d-reagendou-de');
   const reagendouDeTexto = document.getElementById('d-reagendou-de-texto');
   if (consulta.id_reagendado_de) {
-    const origemCode = `CON-${String(consulta.id_reagendado_de).padStart(4, '0')}`;
+    const numOrigem = consulta.num_reagendado_de ?? consulta.id_reagendado_de;
+    const origemCode = `CON-${String(numOrigem).padStart(4, '0')}`;
     reagendouDeTexto.textContent = `Reagendada a partir da consulta ${origemCode}`;
     reagendouDe.style.display = 'flex';
   } else {
@@ -255,6 +257,7 @@ async function carregarConsultas() {
   const params = {};
   if (filtroAtivo !== 'todos') params.status = filtroAtivo;
   if (buscaAtiva.trim()) params.busca = buscaAtiva.trim();
+  if (ordemAtiva !== 'data_desc') params.ordem = ordemAtiva;
 
   try {
     consultasLista = await listarConsultas(params);
@@ -289,6 +292,12 @@ window.addEventListener('DOMContentLoaded', async () => {
       filtroAtivo = pill.dataset.status;
       carregarConsultas();
     });
+  });
+
+  // Ordenação
+  document.getElementById('ordem-select')?.addEventListener('change', e => {
+    ordemAtiva = e.target.value;
+    carregarConsultas();
   });
 
   // Busca com debounce

@@ -125,40 +125,48 @@ function carregarNotificacoes() {
   }
 }
 
-function renderizarSessaoDetalhes(sessao) {
-  if (!sessao) return '';
+function renderizarSessaoDetalhes(sessao, statusConsulta) {
+  if (statusConsulta !== 'Finalizado') return '';
+
   const partes = [];
 
-  if (sessao.prescricao_texto) {
-    partes.push(`
-      <div class="sessao-detalhe-bloco">
-        <span class="sd-label">Prescrição / Orientações Clínicas</span>
-        <p class="sd-texto">${sessao.prescricao_texto.replace(/\n/g, '<br>')}</p>
-      </div>`);
-  }
-  if (sessao.medicamentos) {
-    partes.push(`
-      <div class="sessao-detalhe-bloco">
-        <span class="sd-label">Medicamentos</span>
-        <p class="sd-texto">${sessao.medicamentos.replace(/\n/g, '<br>')}</p>
-      </div>`);
-  }
-  if (sessao.orientacoes_paciente) {
+  if (sessao?.orientacoes_paciente) {
     partes.push(`
       <div class="sessao-detalhe-bloco">
         <span class="sd-label">Orientações para você</span>
         <p class="sd-texto">${sessao.orientacoes_paciente.replace(/\n/g, '<br>')}</p>
       </div>`);
   }
-  if (sessao.proxima_sessao_data) {
+  if (sessao?.prescricao_texto) {
+    partes.push(`
+      <div class="sessao-detalhe-bloco">
+        <span class="sd-label">Prescrição</span>
+        <p class="sd-texto">${sessao.prescricao_texto.replace(/\n/g, '<br>')}</p>
+      </div>`);
+  }
+  if (sessao?.medicamentos) {
+    partes.push(`
+      <div class="sessao-detalhe-bloco">
+        <span class="sd-label">Medicamentos / Suplementos</span>
+        <p class="sd-texto">${sessao.medicamentos.replace(/\n/g, '<br>')}</p>
+      </div>`);
+  }
+  if (sessao?.proxima_sessao_data) {
     partes.push(`
       <div class="sessao-detalhe-bloco proxima-sessao-info">
-        <span class="sd-label">Próxima Sessão Sugerida</span>
+        <span class="sd-label">Próxima Sessão Agendada</span>
         <p class="sd-texto"><strong>${formatarDataBR(sessao.proxima_sessao_data)}</strong>${sessao.proxima_sessao_hora ? ` às ${formatarHorario(sessao.proxima_sessao_hora)}` : ''}</p>
       </div>`);
   }
 
-  if (partes.length === 0) return '';
+  if (partes.length === 0) {
+    partes.push(`
+      <div class="sessao-detalhe-bloco" style="color:#6B7280;">
+        <span class="sd-label">Informações clínicas</span>
+        <p class="sd-texto" style="color:#9CA3AF;font-style:italic;">Nenhuma orientação ou prescrição registrada pela profissional.</p>
+      </div>`);
+  }
+
   return `<div class="sessao-detalhes-container">${partes.join('')}</div>`;
 }
 
@@ -182,7 +190,7 @@ function carregarTelaConsultas() {
 
   ativos.forEach(c => {
     const sessao = c.status === 'Finalizado' ? getSessaoDaConsulta(c.id_agendamento) : null;
-    const detalhesHTML = renderizarSessaoDetalhes(sessao);
+    const detalhesHTML = renderizarSessaoDetalhes(sessao, c.status);
     const isPendente = c.status === 'Pendente';
 
     const row = document.createElement('div');
