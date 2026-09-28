@@ -7,7 +7,7 @@ import authRoutes from './routes/auth.js';
 import mfaRoutes from './routes/mfa.js';
 import authPacienteRoutes from './routes/authPaciente.js';
 import pacienteAreaRoutes from './routes/pacienteArea.js';
-import profissionalRoutes from './routes/profissional.js';
+import profesionalRoutes from './routes/profissional.js';
 import pacientesRoutes from './routes/pacientes.js';
 import agendamentosRoutes from './routes/agendamentos.js';
 import financeiroRoutes from './routes/financeiro.js';
@@ -49,7 +49,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/mfa', mfaRoutes);
 app.use('/api/paciente/auth', authPacienteRoutes);
 app.use('/api/paciente', pacienteAreaRoutes);
-app.use('/api/profissional', profissionalRoutes);
+app.use('/api/profissional', profesionalRoutes);
 app.use('/api/pacientes', pacientesRoutes);
 app.use('/api/agendamentos', agendamentosRoutes);
 app.use('/api/financeiro', financeiroRoutes);
@@ -74,6 +74,19 @@ app.listen(PORT, async () => {
   await runMigrations();
   await limparSlotsExpirados();
   console.log('Slots expirados removidos da agenda.');
+
+  // ─── DESBLOQUEIO AUTOMÁTICO DE MULTI-VAGAS NO POSTGRES ───
+  try {
+    const { default: pool } = await import('./config/database.js');
+    // Remove os índices/constraints restritivos que geravam o erro 400 por duplicidade
+    await pool.query(`ALTER TABLE agendamento DROP CONSTRAINT IF EXISTS agendamento_id_profissional_data_consulta_horario_key;`);
+    await pool.query(`ALTER TABLE agendamento DROP CONSTRAINT IF EXISTS uq_profissional_data_hora;`);
+    await pool.query(`DROP INDEX IF EXISTS idx_agendamento_unico;`);
+    await pool.query(`DROP INDEX IF EXISTS agendamento_profissional_data_horario_idx;`);
+    console.log('✅ [Postgres] Restrições de unicidade de horário removidas com sucesso.');
+  } catch (dbErr) {
+    console.log('⚠️ [Postgres] Aviso ao processar índices:', dbErr instanceof Error ? dbErr.message : dbErr);
+  }
 });
 
 export default app;

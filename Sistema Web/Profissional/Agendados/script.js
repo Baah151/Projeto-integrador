@@ -4,14 +4,46 @@ function gerenciarMenuMobile() {
   const sidebar = document.getElementById('mobile-sidebar');
   const backdrop = document.getElementById('menu-backdrop');
   if (!openBtn || !sidebar || !backdrop) return;
-  openBtn.addEventListener('click', () => { sidebar.classList.add('open'); backdrop.classList.add('active'); });
-  const fechar = () => { sidebar.classList.remove('open'); backdrop.classList.remove('active'); };
+
+  openBtn.addEventListener('click', () => {
+    sidebar.classList.add('open'); 
+    backdrop.classList.add('active'); 
+  });
+  
+  const fechar = () => { 
+    sidebar.classList.remove('open'); 
+    backdrop.classList.remove('active'); 
+  };
+  
   if (closeBtn) closeBtn.addEventListener('click', fechar);
   backdrop.addEventListener('click', fechar);
 }
 
 let agendamentosLista = [];
 let agendamentoSelecionado = null;
+let horarioReagendarEscolhido = null;
+
+// Recupera os atendimentos definidos localmente
+function obterAtendimentosConfigurados() {
+  const salvos = localStorage.getItem('agenda_atendimentos');
+  return salvos ? JSON.parse(salvos) : ['Fisioterapia Geral', 'Avaliação Inicial', 'Pilates Solo'];
+}
+
+// Extrai o nome real do atendimento mesmo se ele estiver embutido nas observações
+function extrairServicoReal(agendamento) {
+  if (agendamento.servico) return agendamento.servico;
+  if (agendamento.especialidade) return agendamento.especialidade;
+  if (agendamento.tipo) return agendamento.tipo;
+  if (agendamento.tipo_atendimento) return agendamento.tipo_atendimento;
+  
+  // Tenta quebrar a string padrão "[Atendimento: Pilates Solo]" das observações
+  if (agendamento.observacoes && agendamento.observacoes.includes('[Atendimento:')) {
+    const match = agendamento.observacoes.match(/\[Atendimento:\s*([^\]]+)\]/);
+    if (match && match[1]) return match[1].trim();
+  }
+  
+  return 'Fisioterapia Geral'; // Fallback padrão caso esteja vazio
+}
 
 function formatarDataBR(dataString) {
   if (!dataString) return '--/--/----';
@@ -19,13 +51,14 @@ function formatarDataBR(dataString) {
   return `${p[2]}/${p[1]}/${p[0]}`;
 }
 
+// CORREÇÃO DA TABELA (IMAGEM image_af68a4.png): Mostra o nome correto do Atendimento na coluna correspondente
 function renderizarTabela(lista) {
   const wrapper = document.getElementById('appointments-table-wrapper');
   const empty = document.getElementById('appointments-empty');
   const tbody = document.getElementById('appointments-rows');
   if (!tbody) return;
-
-  tbody.innerHTML = '';
+  
+  tbody.innerHTML = "";
 
   if (!lista || lista.length === 0) {
     if (wrapper) wrapper.style.display = 'none';
@@ -39,28 +72,30 @@ function renderizarTabela(lista) {
   lista.forEach(a => {
     const temDoc = Number(a.num_documentos) > 0;
     const tr = document.createElement('tr');
+    
+    // Obtém o nome limpo e preenchido do serviço cadastrado
+    const servicoExibido = extrairServicoReal(a);
+    
     tr.innerHTML = `
       <td>
         <strong>${a.nome_paciente || '--'}</strong>
-        ${temDoc ? `<span class="badge-doc-novo" title="Novo documento encaminhado">
-          <span class="material-symbols-outlined" style="font-size:13px;vertical-align:middle;">attach_file</span>
-          Novo doc.
-        </span>` : ''}
+        ${temDoc ? `<span class="badge-doc-novo" title="Novo documento encaminhado"><span class="material-symbols-outlined" style="font-size:13px;vertical-align:middle;">attach_file</span> Novo doc.</span>` : ''}
       </td>
       <td>${formatarDataBR(a.data_consulta)}</td>
       <td>${a.horario ? a.horario.substring(0,5) : '--'}</td>
-      <td>Consulta</td>
+      <td style="color: #374151; font-weight: 500;">${servicoExibido}</td>
       <td style="text-align:right;padding-right:25px;">
         <button class="btn-gerenciar" data-id="${a.id_agendamento}">Gerenciar</button>
       </td>
     `;
+    
     tr.querySelector('.btn-gerenciar').addEventListener('click', () => abrirModalGerenciar(a));
     tbody.appendChild(tr);
   });
 }
 
 function formatarBytes(bytes) {
-  if (!bytes) return '';
+  if (!bytes) return "";
   return bytes > 1024 * 1024
     ? `${(bytes / (1024 * 1024)).toFixed(1)} MB`
     : `${Math.round(bytes / 1024)} KB`;
@@ -69,7 +104,10 @@ function formatarBytes(bytes) {
 async function downloadDocumento(docMeta) {
   try {
     const doc = await apiRequest('GET', `/documentos/${docMeta.id_documento}/download`);
-    if (!doc || !doc.conteudo_base64) { showNotification('Arquivo sem conteúdo.', 'error'); return; }
+    if (!doc || !doc.conteudo_base64) { 
+      if (typeof showNotification === "function") showNotification('Arquivo sem conteúdo.', 'error');
+      return; 
+    }
     const link = document.createElement('a');
     link.href = `data:${doc.tipo_arquivo || 'application/octet-stream'};base64,${doc.conteudo_base64}`;
     link.download = doc.nome_arquivo;
@@ -77,7 +115,7 @@ async function downloadDocumento(docMeta) {
     link.click();
     document.body.removeChild(link);
   } catch {
-    showNotification('Erro ao baixar arquivo.', 'error');
+    if (typeof showNotification === "function") showNotification('Erro ao baixar arquivo.', 'error');
   }
 }
 
@@ -85,19 +123,22 @@ async function carregarDocsAgendamento(agendamentoId, pacienteId) {
   const container = document.getElementById('docs-agendamento-lista');
   if (!container) return;
   container.innerHTML = '<small style="color:#9CA3AF;">Carregando...</small>';
+  
   try {
     const docs = await apiRequest('GET', `/documentos/agendamento/${agendamentoId}?pacienteId=${pacienteId}`) || [];
     if (docs.length === 0) {
       container.innerHTML = '<small style="color:#9CA3AF;">Nenhum documento enviado pelo paciente.</small>';
       return;
     }
-    container.innerHTML = '';
+    container.innerHTML = "";
     docs.forEach(d => {
       const item = document.createElement('div');
-      item.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f3f4f6;';
+      item.style.cssText = 'display:flex; justify-content:space-between; align-items:center;padding:7px 0;border-bottom:1px solid #f3f4f6;';
       item.innerHTML = `
-        <span style="font-size:0.82rem;color:#374151;">📎 <strong>${d.nome_arquivo}</strong> <small style="color:#9CA3AF;">${formatarBytes(d.tamanho_bytes)}</small></span>
-        <button style="background:#10B981;color:white;border:none;padding:4px 12px;border-radius:8px;font-size:0.75rem;cursor:pointer;font-weight:600;">Download</button>
+        <span style="font-size:0.82rem;color:#374151;">
+          <strong>${d.nome_arquivo}</strong> <small style="color:#9CA3AF;">${formatarBytes(d.tamanho_bytes)}</small>
+        </span>
+        <button style="background:#10B981;color:white; border:none; padding:4px 12px;border-radius:8px;font-size:0.75rem;cursor:pointer;font-weight:600;">Download</button>
       `;
       item.querySelector('button').addEventListener('click', () => downloadDocumento(d));
       container.appendChild(item);
@@ -110,43 +151,150 @@ async function carregarDocsAgendamento(agendamentoId, pacienteId) {
 function abrirModalGerenciar(agendamento) {
   agendamentoSelecionado = agendamento;
   const info = document.getElementById('modificar-info-paciente');
-  if (info) info.textContent = `${agendamento.nome_paciente || '--'} — ${formatarDataBR(agendamento.data_consulta)} às ${agendamento.horario ? agendamento.horario.substring(0,5) : '--'}`;
+  const servicoAtual = extrairServicoReal(agendamento);
 
+  if (info) {
+    info.innerHTML = `<strong>Paciente:</strong> ${agendamento.nome_paciente || '--'}<br>
+                      <strong>Serviço Atual:</strong> <span style="color:#046C4E;font-weight:600;">${servicoAtual}</span><br>
+                      <strong>Horário:</strong> ${formatarDataBR(agendamento.data_consulta)} às ${agendamento.horario ? agendamento.horario.substring(0,5) : '--'}`;
+  }
+  
   const obsContainer = document.getElementById('obs-paciente-container');
   const obsTexto = document.getElementById('obs-paciente-texto');
+  
   if (agendamento.observacoes) {
     if (obsContainer) obsContainer.style.display = 'block';
     if (obsTexto) obsTexto.textContent = agendamento.observacoes;
   } else {
     if (obsContainer) obsContainer.style.display = 'none';
   }
-
+  
   if (agendamento.id_agendamento && agendamento.id_paciente) {
     carregarDocsAgendamento(agendamento.id_agendamento, agendamento.id_paciente);
   }
-
+  
   document.getElementById('modal-modificar').classList.add('active');
 }
 
 async function carregarAgendamentos() {
   try {
-    agendamentosLista = await listarAgendamentos({ status: 'Confirmado' });
+    agendamentosLista = await apiRequest('GET', '/agendamentos?status=Confirmado') || [];
   } catch (err) {
-    showNotification(err.message || 'Erro ao carregar agendamentos.', 'error');
+    if (typeof showNotification === "function") showNotification(err.message || 'Erro ao carregar agendamentos.', 'error');
     agendamentosLista = [];
   }
 }
 
-// ── Utilitários de período ────────────────────────────────────────
+function popularDropdownReagendamento() {
+  const select = document.getElementById('reagendar-servico-select');
+  if (!select) return;
+  const atendimentos = obterAtendimentosConfigurados();
+  select.innerHTML = '<option value="" disabled selected>Selecione o tipo de atendimento</option>';
+  atendimentos.forEach(atend => {
+    const opt = document.createElement('option');
+    opt.value = atend;
+    opt.textContent = atend;
+    select.appendChild(opt);
+  });
+}
+
+// Resgata o tipo de atendimento associado localmente ao slot (Data + Hora) para dar o match de filtro do backend
+function obterAtendimentoDoSlot(data, horario) {
+  const mapa = JSON.parse(localStorage.getItem('mapa_atendimentos_slots') || '{}');
+  const dataLimpa = String(data).substring(0, 10);
+  const horaLimpa = String(horario).substring(0, 5);
+  return mapa[`${dataLimpa}_${horaLimpa}`];
+}
+
+// ─── CONEXÃO DOS HORÁRIOS DISPONÍVEIS CONECTADOS COM O TIPO DE ATENDIMENTO E VAGAS ───
+async function buscarHorariosLivresReagendar(dataSelecionada, servicoSelecionado) {
+  const grid = document.getElementById('reagendar-horarios-grid');
+  const btnConcluir = document.getElementById('btn-concluir-reagendamento');
+  if (!grid) return;
+  
+  if (!dataSelecionada || !servicoSelecionado) {
+    grid.innerHTML = '<p style="color:#9CA3AF; font-size:0.8rem; padding: 10px; text-align:center; width:100%;">Escolha um serviço e uma data para ver os horários livres.</p>';
+    return;
+  }
+  
+  grid.innerHTML = '<p style="color:#9CA3AF; font-size:0.85rem; padding:10px;">Buscando horários...</p>';
+  horarioReagendarEscolhido = null;
+  if (btnConcluir) btnConcluir.disabled = true;
+
+  try {
+    // Busca direto da rota pública de disponibilidade geral do painel
+    const slots = await apiRequest('GET', '/agendamentos/disponibilidade') || [];
+    
+    // Filtra aplicando o match exato de data e tipo de serviço configurado pela Luana
+    const horariosDoDia = slots.filter(s => {
+      const dataMatch = String(s.data_disponivel).substring(0,10) === dataSelecionada;
+      const tipoDoSlot = s.servico || s.especialidade || s.tipo || s.tipo_atendimento || obterAtendimentoDoSlot(s.data_disponivel, s.horario) || 'Fisioterapia Geral';
+      return dataMatch && tipoDoSlot === servicoSelecionado;
+    });
+
+    grid.innerHTML = "";
+    
+    if (horariosDoDia.length === 0) {
+      grid.innerHTML = `<p style="color:#DC2626; font-size:0.85rem; padding:10px; text-align:center; width: 100%;">
+                          Nenhum horário de "${servicoSelecionado}" cadastrado para esta data.
+                        </p>`;
+      return;
+    }
+
+    // Busca todos os agendamentos ativos cadastrados para conferir o limite de multi-vagas por linha do banco
+    let todosAgendamentos = [];
+    try {
+      todosAgendamentos = await apiRequest('GET', '/agendamentos') || [];
+    } catch (e) {
+      todosAgendamentos = [];
+    }
+
+    horariosDoDia.sort((a,b) => String(a.horario).localeCompare(String(b.horario))).forEach(slot => {
+      const hora = String(slot.horario).substring(0,5);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'slot-reagendar-btn';
+      
+      const limiteVagas = parseInt(slot.vagas || '1');
+      
+      // Conta quantas linhas reais de pacientes ativos existem no mesmo minuto de forma global
+      const ocupadasNoMinuto = todosAgendamentos.filter(a => 
+        String(a.data_consulta).substring(0, 10) === dataSelecionada && 
+        (a.horario ? a.horario.substring(0, 5) : '') === hora &&
+        a.status !== 'Cancelado'
+      ).length;
+      
+      const flagOcupado = slot.ocupado === true || slot.ocupado === 'true' || slot.ocupado === 1 || slot.status === 'Ocupado';
+      const esgotouLimiteVagas = ocupadasNoMinuto >= limiteVagas;
+
+      if (flagOcupado || esgotouLimiteVagas) {
+        btn.textContent = `${hora} (Esgotado)`;
+        btn.disabled = true;
+        btn.style.cssText = 'background:#F3F4F6; color:#9CA3AF; border-color:#E5E7EB; cursor:not-allowed;';
+      } else {
+        const vagasRestantes = limiteVagas - ocupadasNoMinuto;
+        btn.textContent = limiteVagas > 1 ? `${hora} (${vagasRestantes} vg)` : hora;
+        
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.slot-reagendar-btn').forEach(b => b.classList.remove('selected'));
+          btn.classList.add('selected');
+          horarioReagendarEscolhido = hora;
+          if (btnConcluir) btnConcluir.disabled = false;
+        });
+      }
+      grid.appendChild(btn);
+    });
+  } catch (err) {
+    grid.innerHTML = '<p style="color:#DC2626; font-size:0.85rem; padding:10px;">Erro ao carregar os horários.</p>';
+  }
+}
+
 function toISO(d) { return d.toISOString().substring(0, 10); }
 
 function calcularPeriodo(periodo) {
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
-
-  if (periodo === 'hoje') {
-    return { inicio: toISO(hoje), fim: toISO(hoje) };
-  }
+  if (periodo === 'hoje') return { inicio: toISO(hoje), fim: toISO(hoje) };
   if (periodo === 'semana') {
     const dom = new Date(hoje);
     dom.setDate(hoje.getDate() - hoje.getDay());
@@ -160,10 +308,10 @@ function calcularPeriodo(periodo) {
     return { inicio: toISO(ini), fim: toISO(fim) };
   }
   if (periodo === 'trimestre') {
-    const mesAtual = hoje.getMonth(); // 0–11
-    const inicioTrimestre = Math.floor(mesAtual / 3) * 3; // 0, 3, 6 ou 9
+    const mesAtual = hoje.getMonth();
+    const inicioTrimestre = Math.floor(mesAtual / 3) * 3;
     const ini = new Date(hoje.getFullYear(), inicioTrimestre, 1);
-    const fim = new Date(hoje.getFullYear(), inicioTrimestre + 3, 0); // dia 0 do mês seguinte = último dia do trimestre
+    const fim = new Date(hoje.getFullYear(), inicioTrimestre + 3, 0);
     return { inicio: toISO(ini), fim: toISO(fim) };
   }
   if (periodo === 'ano') {
@@ -182,10 +330,7 @@ function aplicarFiltroRange(inicio, fim) {
     if (fim && data > fim) return false;
     return true;
   });
-
   renderizarTabela(filtered);
-
-  // Atualizar contador
   const countTexto = document.getElementById('filtro-count-texto');
   if (countTexto) {
     countTexto.textContent = `${filtered.length} consulta${filtered.length !== 1 ? 's' : ''} em aberto`;
@@ -193,83 +338,144 @@ function aplicarFiltroRange(inicio, fim) {
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
-  if (!verificarAutenticacao()) return;
+  if (typeof verificarAutenticacao === "function") {
+    if (!verificarAutenticacao()) return;
+  }
   gerenciarMenuMobile();
-
+  
   const dropdownBody = document.getElementById('dropdown-body');
   if (dropdownBody) dropdownBody.innerHTML = '<div class="dropdown-item" style="text-align:center;color:#9ca3af;">Nenhuma notificação.</div>';
-
+  
   const bell = document.getElementById('bell-button');
   const notiDropdown = document.getElementById('noti-dropdown');
   if (bell && notiDropdown) {
-    bell.addEventListener('click', (e) => { e.stopPropagation(); notiDropdown.classList.toggle('show'); });
+    bell.addEventListener('click', (e) => { 
+      e.stopPropagation();
+      notiDropdown.classList.toggle('show'); 
+    });
     document.addEventListener('click', () => notiDropdown.classList.remove('show'));
   }
 
   const inputInicio = document.getElementById('filter-inicio');
   const inputFim = document.getElementById('filter-fim');
-
-  // Pills rápidos
+  
   document.querySelectorAll('.filtro-pill').forEach(pill => {
     pill.addEventListener('click', () => {
       document.querySelectorAll('.filtro-pill').forEach(p => p.classList.remove('filtro-pill-ativo'));
       pill.classList.add('filtro-pill-ativo');
-
       const { inicio, fim } = calcularPeriodo(pill.dataset.periodo);
-      if (inputInicio) inputInicio.value = inicio || '';
-      if (inputFim) inputFim.value = fim || '';
+      if (inputInicio) inputInicio.value = inicio || "";
+      if (inputFim) inputFim.value = fim || "";
       aplicarFiltroRange(inicio, fim);
     });
   });
 
-  // Inputs manuais desativam pills
   function onRangeManual() {
     document.querySelectorAll('.filtro-pill').forEach(p => p.classList.remove('filtro-pill-ativo'));
     aplicarFiltroRange(inputInicio?.value || null, inputFim?.value || null);
   }
+
   inputInicio?.addEventListener('change', onRangeManual);
   inputFim?.addEventListener('change', onRangeManual);
 
   await carregarAgendamentos();
 
-  // Aplicar "Este mês" como padrão ao carregar
   const periodoInicial = calcularPeriodo('mes');
   if (inputInicio) inputInicio.value = periodoInicial.inicio;
   if (inputFim) inputFim.value = periodoInicial.fim;
   aplicarFiltroRange(periodoInicial.inicio, periodoInicial.fim);
 
-  // Modal principal
   const modalModificar = document.getElementById('modal-modificar');
   document.getElementById('close-modal-modificar')?.addEventListener('click', () => modalModificar.classList.remove('active'));
 
-  // --- FINALIZAR → navega para página Registrar-Sessao ---
+  // FINALIZAR ---
   document.getElementById('btn-trigger-finalizar')?.addEventListener('click', () => {
     if (!agendamentoSelecionado) return;
     localStorage.setItem('sessao_agendamento', JSON.stringify(agendamentoSelecionado));
     window.location.href = '../Registrar-Sessao/index.html';
   });
 
-  // --- CANCELAR ---
+  // REAGENDAR SESSÃO ATUAL ---
+  const modalReagendar = document.getElementById('modal-sub-reagendar');
+  const dataReagendarInput = document.getElementById('reagendar-data-input');
+  const servicoReagendarSelect = document.getElementById('reagendar-servico-select');
+
+  document.getElementById('btn-trigger-reagendar')?.addEventListener('click', () => {
+    modalModificar.classList.remove('active');
+    popularDropdownReagendamento();
+    
+    if (dataReagendarInput) dataReagendarInput.value = "";
+    if (servicoReagendarSelect) servicoReagendarSelect.value = "";
+    
+    const hoje = new Date().toISOString().split('T')[0];
+    if (dataReagendarInput) dataReagendarInput.min = hoje;
+    
+    document.getElementById('reagendar-horarios-grid').innerHTML = '<p style="color:#9CA3AF; font-size:0.8rem; padding: 10px; text-align:center; width:100%;">Escolha um serviço e uma data para ver os horários livres.</p>';
+    modalReagendar.classList.add('active');
+  });
+
+  const dispararBuscaSlots = () => {
+    if (dataReagendarInput?.value && servicoReagendarSelect?.value) {
+      buscarHorariosLivresReagendar(dataReagendarInput.value, servicoReagendarSelect.value);
+    }
+  };
+
+  dataReagendarInput?.addEventListener('change', dispararBuscaSlots);
+  servicoReagendarSelect?.addEventListener('change', dispararBuscaSlots);
+
+  document.getElementById('btn-voltar-reagendar')?.addEventListener('click', () => {
+    modalReagendar.classList.remove('active');
+    modalModificar.classList.add('active');
+  });
+
+  document.getElementById('btn-concluir-reagendamento')?.addEventListener('click', async () => {
+    if (!agendamentoSelecionado || !dataReagendarInput.value || !horarioReagendarEscolhido || !servicoReagendarSelect.value) return;
+    const btn = document.getElementById('btn-concluir-reagendamento');
+    btn.disabled = true;
+    try {
+      const observacaoComAtendimento = `[Atendimento: ${servicoReagendarSelect.value}]`;
+      
+      await apiRequest('PUT', `/agendamentos/${agendamentoSelecionado.id_agendamento}`, {
+        data_consulta: dataReagendarInput.value,
+        horario: horarioReagendarEscolhido + ':00',
+        observacoes: observacaoComAtendimento
+      });
+      if (typeof showNotification === "function") showNotification('Consulta reagendada com sucesso!');
+      modalReagendar.classList.remove('active');
+      await carregarAgendamentos();
+      aplicarFiltroRange(inputInicio?.value, inputFim?.value);
+    } catch (err) {
+      if (typeof showNotification === "function") showNotification(err.message || 'Erro ao reagendar consulta.', 'error');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+
+  // CANCELAR ---
   const modalCancelar = document.getElementById('modal-sub-cancelar');
   document.getElementById('btn-trigger-cancelar')?.addEventListener('click', () => {
     modalModificar.classList.remove('active');
     document.getElementById('cancelar-motivo').value = '';
     modalCancelar.classList.add('active');
   });
-  document.getElementById('btn-voltar-cancelar')?.addEventListener('click', () => { modalCancelar.classList.remove('active'); modalModificar.classList.add('active'); });
+
+  document.getElementById('btn-voltar-cancelar')?.addEventListener('click', () => {
+    modalCancelar.classList.remove('active');
+    modalModificar.classList.add('active');
+  });
 
   document.getElementById('btn-concluir-cancelar-agenda')?.addEventListener('click', async () => {
     if (!agendamentoSelecionado) return;
     const btn = document.getElementById('btn-concluir-cancelar-agenda');
     btn.disabled = true;
     try {
-      await cancelarAgendamento(agendamentoSelecionado.id_agendamento);
-      showNotification('Agendamento cancelado.');
+      await apiRequest('DELETE', `/agendamentos/${agendamentoSelecionado.id_agendamento}`);
+      if (typeof showNotification === "function") showNotification('Agendamento cancelado.');
       modalCancelar.classList.remove('active');
       agendamentosLista = agendamentosLista.filter(a => a.id_agendamento !== agendamentoSelecionado.id_agendamento);
-      renderizarTabela(agendamentosLista);
+      aplicarFiltroRange(inputInicio?.value, inputFim?.value);
     } catch (err) {
-      showNotification(err.message || 'Erro ao cancelar.', 'error');
+      if (typeof showNotification === "function") showNotification(err.message || 'Erro ao cancelar.', 'error');
     } finally {
       btn.disabled = false;
     }

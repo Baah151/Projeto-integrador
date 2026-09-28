@@ -28,4 +28,6 @@ router.delete('/documentos/:id', pacienteAreaController.deletarDocumento);
 
 router.get('/sessoes', pacienteAreaController.getSessoes);
 
+router.get('/sessoes', pacienteAreaController.getSessoes);
+router.get('/clinica', pacienteAreaController.getClinica);
 export default router;

@@ -8,6 +8,35 @@ const HORARIOS_PREDEFINIDOS = [
 let horariosSelecionados = new Set();
 let slotsPublicados = [];
 
+// Gerenciamento persistente dos tipos de atendimento no LocalStorage
+function obterAtendimentosSalvos() {
+  const salvos = localStorage.getItem('agenda_atendimentos');
+  return salvos ? JSON.parse(salvos) : ['Fisioterapia Geral', 'Avaliação Inicial', 'Pilates Solo'];
+}
+
+function atualizarDropdownAtendimentos() {
+  const select = document.getElementById('atendimento-select');
+  if (!select) return;
+  const atendimentos = obterAtendimentosSalvos();
+  select.innerHTML = atendimentos.map(a => `<option value="${a}">${a}</option>`).join('');
+}
+
+// Vincula o nome do atendimento a uma chave única (Data + Horário) para o front recuperar sem depender do banco
+function salvarMapeamentoAtendimentoLocal(data, horario, tipo) {
+  const mapa = JSON.parse(localStorage.getItem('mapa_atendimentos_slots') || '{}');
+  const dataLimpa = String(data).substring(0, 10);
+  const horaLimpa = String(horario).substring(0, 5);
+  mapa[`${dataLimpa}_${horaLimpa}`] = tipo;
+  localStorage.setItem('mapa_atendimentos_slots', JSON.stringify(mapa));
+}
+
+function obterAtendimentoLocal(data, horario) {
+  const mapa = JSON.parse(localStorage.getItem('mapa_atendimentos_slots') || '{}');
+  const dataLimpa = String(data).substring(0, 10);
+  const horaLimpa = String(horario).substring(0, 5);
+  return mapa[`${dataLimpa}_${horaLimpa}`];
+}
+
 function gerenciarMenuMobile() {
   const openBtn = document.getElementById('open-menu-btn');
   const closeBtn = document.getElementById('close-menu-btn');
@@ -42,6 +71,7 @@ function atualizarPreview() {
   }
 }
 
+// Grade inteligente que impede a seleção de horários repetidos já publicados
 function construirGrade(dataSelecionada) {
   const grid = document.getElementById('time-slots-grid');
   const hint = document.getElementById('slots-hint');
@@ -56,7 +86,6 @@ function construirGrade(dataSelecionada) {
   }
   if (hint) hint.style.display = 'none';
 
-  // Horários já publicados para essa data
   const jaPublicados = new Set(
     slotsPublicados
       .filter(s => String(s.data_disponivel).substring(0, 10) === dataSelecionada)
@@ -72,7 +101,9 @@ function construirGrade(dataSelecionada) {
 
     if (jaPublicados.has(hora)) {
       btn.classList.add('ocupado');
-      btn.title = 'Já publicado';
+      btn.style.opacity = '0.4';
+      btn.style.cursor = 'not-allowed';
+      btn.title = 'Horário já publicado para este dia!';
     } else {
       btn.addEventListener('click', () => {
         if (horariosSelecionados.has(hora)) {
@@ -114,7 +145,6 @@ async function carregarSlots() {
   }
   if (emptyState) emptyState.style.display = 'none';
 
-  // Agrupar por data
   const porData = {};
   slotsPublicados.forEach(s => {
     const data = String(s.data_disponivel).substring(0, 10);
@@ -129,7 +159,6 @@ async function carregarSlots() {
     const block = document.createElement('div');
     block.className = 'published-day-block accordion-block';
 
-    // Cabeçalho clicável (começa fechado)
     const header = document.createElement('div');
     header.className = 'accordion-header';
     header.innerHTML = `
@@ -141,27 +170,39 @@ async function carregarSlots() {
       <span class="material-symbols-outlined accordion-chevron">chevron_right</span>
     `;
 
-    // Corpo (oculto por padrão)
     const body = document.createElement('div');
     body.className = 'accordion-body';
 
     slots.forEach(s => {
       const item = document.createElement('div');
       item.className = 'published-item';
+      
+      // SOLUÇÃO DINÂMICA: Verifica as colunas da API e, se vier vazio, puxa do mapeamento local persistente
+      const nomeAtendimento = s.servico || 
+                              s.especialidade || 
+                              s.tipo || 
+                              s.tipo_atendimento || 
+                              obterAtendimentoLocal(s.data_disponivel, s.horario) || 
+                              'Atendimento Geral';
+
       item.innerHTML = `
-        <span><strong>${formatarHorario(s.horario)}</strong> — ${s.vagas} vaga(s)</span>
+        <div style="display:flex; flex-direction:column;">
+          <span><strong>${formatarHorario(s.horario)}</strong> — ${s.vagas} vaga(s)</span>
+          <small style="color:#6b7280; font-size:11px; margin-top:2px;">Tipo: ${nomeAtendimento}</small>
+        </div>
         <button class="btn-remove-published btn-remover-slot" data-id="${s.id_disponibilidade}" title="Remover">×</button>
       `;
+
       item.querySelector('.btn-remover-slot').addEventListener('click', async (e) => {
         e.stopPropagation();
         try {
           await apiRequest('DELETE', `/agendamentos/disponibilidade/${s.id_disponibilidade}`);
-          showNotification('Horário removido.');
+          if (typeof showNotification === "function") showNotification('Horário removido.');
           await carregarSlots();
           const dataInput = document.getElementById('data-disponivel');
           if (dataInput?.value) construirGrade(dataInput.value);
         } catch (err) {
-          showNotification(err.message || 'Erro ao remover.', 'error');
+          if (typeof showNotification === "function") showNotification(err.message || 'Erro ao remover.', 'error');
         }
       });
       body.appendChild(item);
@@ -179,8 +220,45 @@ async function carregarSlots() {
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
-  if (!verificarAutenticacao()) return;
+  if (typeof verificarAutenticacao === "function") {
+    if (!verificarAutenticacao()) return;
+  }
+  
   gerenciarMenuMobile();
+  atualizarDropdownAtendimentos();
+
+  const btnAddAtendimento = document.getElementById('btn-add-atendimento');
+  const inputNovoAtendimento = document.getElementById('novo-atendimento-input');
+  const btnDelAtendimento = document.getElementById('btn-del-atendimento');
+  const selectAtendimento = document.getElementById('atendimento-select');
+
+  if (btnAddAtendimento && inputNovoAtendimento) {
+    btnAddAtendimento.addEventListener('click', () => {
+      const valor = inputNovoAtendimento.value.trim();
+      if (!valor) return;
+      const atuais = obterAtendimentosSalvos();
+      if (!atuais.includes(valor)) {
+        atuais.push(valor);
+        localStorage.setItem('agenda_atendimentos', JSON.stringify(atuais));
+        atualizarDropdownAtendimentos();
+        selectAtendimento.value = valor;
+        inputNovoAtendimento.value = '';
+        if (typeof showNotification === "function") showNotification('Tipo de atendimento adicionado!');
+      }
+    });
+  }
+
+  if (btnDelAtendimento && selectAtendimento) {
+    btnDelAtendimento.addEventListener('click', () => {
+      const selecionado = selectAtendimento.value;
+      if (!selecionado) return;
+      let atuais = obterAtendimentosSalvos();
+      atuais = atuais.filter(a => a !== selecionado);
+      localStorage.setItem('agenda_atendimentos', JSON.stringify(atuais));
+      atualizarDropdownAtendimentos();
+      if (typeof showNotification === "function") showNotification('Tipo de atendimento removido.');
+    });
+  }
 
   const dropdownBody = document.getElementById('dropdown-body');
   if (dropdownBody) dropdownBody.innerHTML = '<div class="dropdown-item" style="text-align:center;color:#9ca3af;">Nenhuma notificação.</div>';
@@ -194,24 +272,22 @@ window.addEventListener('DOMContentLoaded', async () => {
 
   await carregarSlots();
 
-  // Reagir à mudança de data
   const dataInput = document.getElementById('data-disponivel');
   if (dataInput) {
     dataInput.addEventListener('change', () => construirGrade(dataInput.value));
-    // Definir mínimo como hoje
     const hoje = new Date().toISOString().split('T')[0];
     dataInput.min = hoje;
   }
 
-  // Publicar horários selecionados
   const btnLiberar = document.getElementById('btn-liberar');
   if (btnLiberar) {
     btnLiberar.addEventListener('click', async () => {
       const data = dataInput?.value;
       const vagas = parseInt(document.getElementById('vagas-input')?.value || '1');
+      const atendimentoSelecionado = selectAtendimento?.value || 'Geral';
 
-      if (!data) { showNotification('Selecione uma data.', 'error'); return; }
-      if (horariosSelecionados.size === 0) { showNotification('Selecione pelo menos um horário.', 'error'); return; }
+      if (!data) { if (typeof showNotification === "function") showNotification('Selecione uma data.', 'error'); return; }
+      if (horariosSelecionados.size === 0) { if (typeof showNotification === "function") showNotification('Selecione pelo menos um horário.', 'error'); return; }
 
       btnLiberar.textContent = 'Publicando...';
       btnLiberar.disabled = true;
@@ -219,7 +295,18 @@ window.addEventListener('DOMContentLoaded', async () => {
       let erros = 0;
       for (const horario of [...horariosSelecionados].sort()) {
         try {
-          await apiRequest('POST', '/agendamentos/disponibilidade', { data, horario: horario + ':00', vagas });
+          const horaFormatada = horario + ':00';
+          
+          // Salva localmente antes de enviar para garantir que o front-end lembre qual tipo foi selecionado
+          salvarMapeamentoAtendimentoLocal(data, horaFormatada, atendimentoSelecionado);
+
+          await apiRequest('POST', '/agendamentos/disponibilidade', { 
+            data, 
+            horario: horaFormatada, 
+            vagas,
+            servico: atendimentoSelecionado,
+            especialidade: atendimentoSelecionado
+          });
         } catch {
           erros++;
         }
@@ -229,13 +316,13 @@ window.addEventListener('DOMContentLoaded', async () => {
       btnLiberar.disabled = false;
 
       if (erros === 0) {
-        showNotification(`${horariosSelecionados.size} horário(s) publicado(s) com sucesso!`);
+        if (typeof showNotification === "function") showNotification(`${horariosSelecionados.size} horário(s) publicado(s) com sucesso!`);
       } else {
-        showNotification(`${erros} horário(s) com erro. Verifique conflitos.`, 'warning');
+        if (typeof showNotification === "function") showNotification(`${erros} horário(s) com erro. Verifique conflitos.`, 'warning');
       }
 
       await carregarSlots();
-      construirGrade(data);
+      if (data) construirGrade(data);
     });
   }
 });

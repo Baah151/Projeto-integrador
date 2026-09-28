@@ -654,3 +654,74 @@ body {
     .session-grid-data { grid-template-columns: 1fr; gap: 10px; }
     .session-laudo-panel { flex-direction: column; align-items: stretch; }
 }
+
+
+
+
+
+
+/* Correções para o Modal de Agendamento */
+#modal-agendar-prontuario .modal-card {
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Estilo para os Selects e Inputs dentro dos modais */
+#agendar-servico-select, #agendar-data {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #E5E7EB;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+#agendar-servico-select:focus, #agendar-data:focus {
+    border-color: #3B82F6;
+}
+
+/* Grid de horários */
+#agendar-horarios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid #E5E7EB;
+    border-radius: 10px;
+    background: #FAFCF8;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.slot-reagendar-btn {
+    padding: 8px;
+    border: 1px solid #D1D5DB;
+    border-radius: 8px;
+    background: white;
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-align: center;
+}
+
+.slot-reagendar-btn:hover {
+    background: #F3F4F6;
+}
+
+/* Ajuste fino para os botões de ação do modal */
+.modal-alert-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-alert-submit {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}

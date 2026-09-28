@@ -170,3 +170,12 @@ function showNotification(message, type = 'success') {
 const styleTag = document.createElement('style');
 styleTag.textContent = '@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}';
 document.head.appendChild(styleTag);
+
+// ─── DADOS DA CLÍNICA ─────────────────────────────────────────────────────────
+
+async function obterDadosClinica() {
+  // Agora essa rota existe no backend e está protegida com o token do paciente!
+  return apiRequest('GET', '/paciente/clinica'); 
+}
+
+window.obterDadosClinica = obterDadosClinica;

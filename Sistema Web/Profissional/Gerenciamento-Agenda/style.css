@@ -707,3 +707,43 @@ input[type="number"]:focus {
         width: 290px;
     }
 }
+
+/* --- Ajustes do Gerenciamento de Serviços (Item 2) --- */
+#novo-atendimento-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #D1D5DB;
+    border-radius: 6px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+#novo-atendimento-input:focus {
+    border-color: #046C4E;
+}
+
+#btn-add-atendimento {
+    transition: background-color 0.2s;
+}
+
+#btn-add-atendimento:hover {
+    background-color: #03543E !important;
+}
+
+#btn-del-atendimento {
+    transition: background-color 0.2s;
+}
+
+#btn-del-atendimento:hover {
+    background-color: #B91C1C !important;
+}
+
+/* --- Efeito Visual para Horários já Publicados (Indisponíveis) --- */
+.time-slot-btn.ocupado {
+    background-color: #E5E7EB !important;
+    color: #9CA3AF !important;
+    border: 1px dashed #D1D5DB !important;
+    text-decoration: line-through;
+}

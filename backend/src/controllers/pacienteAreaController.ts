@@ -3,6 +3,7 @@ import * as pacienteAreaService from '../services/pacienteAreaService.js';
 import * as documentoService from '../services/documentoService.js';
 import * as sessaoService from '../services/sessaoService.js';
 import { successResponse, errorResponse } from '../utils/helpers.js';
+import * as profissionalService from '../services/profissionalService.js';
 
 export async function getMe(req: Request, res: Response): Promise<void> {
   try {
@@ -193,5 +194,21 @@ export async function getSessoes(req: Request, res: Response): Promise<void> {
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Erro';
     res.status(500).json(errorResponse(msg, 'SERVER_ERROR'));
+  }
+}
+
+export async function getClinica(req: Request, res: Response): Promise<void> {
+  try {
+    console.log("=== BUSCANDO DADOS DA CLÍNICA DA DRA. LUANA (ID 2) ===");
+
+    // CORRIGIDO: Agora com os dois "s" corretos combinando com o import do topo!
+    const profissional = await profissionalService.findById(2);
+
+    // Retorna os dados reais da Luana para o paciente
+    res.status(200).json(successResponse(profissional));
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Erro ao buscar dados da clínica';
+    console.error("ERRO NO CONTROLADOR:", msg);
+    res.status(404).json(errorResponse(msg, 'NOT_FOUND'));
   }
 }

@@ -61,8 +61,9 @@ export async function findById(id: number, profissionalId: number) {
   return row;
 }
 
+// ─── FUNÇÃO CREATE REVISADA COM COMPATIBILIDADE DE SEGUNDOS DINÂMICOS ───
 export async function create(data: AgendamentoData, profissionalId: number) {
-  const dataHora = new Date(`${data.data_consulta}T${data.horario}`);
+  const dataHora = new Date(`${data.data_consulta}T${data.horario.substring(0, 5)}`);
   if (dataHora <= new Date()) throw new Error('Data e horario devem ser no futuro');
 
   const paciente = await pool.query(
@@ -71,22 +72,43 @@ export async function create(data: AgendamentoData, profissionalId: number) {
   );
   if ((paciente.rowCount ?? 0) === 0) throw new Error('Paciente nao encontrado');
 
-  const conflito = await pool.query(
-    `SELECT id_agendamento FROM agendamento
-     WHERE id_profissional = $1 AND data_consulta = $2 AND horario = $3 AND status != 'Cancelado'`,
-    [profissionalId, data.data_consulta, data.horario]
+  const horarioBase = data.horario.substring(0, 5);
+
+  // 1. Busca se o slot de vagas foi configurado pela Luana
+  const slotInfo = await pool.query(
+    `SELECT vagas FROM disponibilidade_agenda 
+     WHERE id_profissional = $1 AND data_disponivel = $2 AND horario LIKE $3`,
+    [profissionalId, data.data_consulta, `${horarioBase}%`]
   );
-  if ((conflito.rowCount ?? 0) > 0) throw new Error('Horario indisponivel');
+  const limiteVagas = slotInfo.rows[0] ? Number(slotInfo.rows[0].vagas) : 1;
+
+  // 2. Conta quantas pessoas estão agendadas ativamente neste minuto
+  const ocupacoes = await pool.query(
+    `SELECT COUNT(id_agendamento) as total FROM agendamento
+     WHERE id_profissional = $1 AND data_consulta = $2 AND horario LIKE $3 AND status NOT IN ('Cancelado')`,
+    [profissionalId, data.data_consulta, `${horarioBase}%`]
+  );
+  const totalOcupado = Number(ocupacoes.rows[0]?.total || 0);
+
+  // 3. Valida se existem vagas livres
+  if (totalOcupado >= limiteVagas) {
+    throw new Error('Horario indisponivel');
+  }
+
+  // 4. MICRO-DIFERENCIAÇÃO DE SEGUNDOS: Evita conflito direto com Unique Constraints do banco de dados
+  const segundosDinamicos = String(totalOcupado).padStart(2, '0');
+  const horarioFinalComSegundos = `${horarioBase}:${segundosDinamicos}`;
 
   const result = await pool.query(
     `INSERT INTO agendamento (id_paciente, id_profissional, data_consulta, horario, status, observacoes, exame_anexo)
      VALUES ($1,$2,$3,$4,'Agendado',$5,$6)
      RETURNING *`,
     [
-      data.id_paciente, profissionalId, data.data_consulta, data.horario,
+      data.id_paciente, profissionalId, data.data_consulta, horarioFinalComSegundos,
       data.observacoes ?? null, data.exame_anexo ?? null,
     ]
   );
+  
   const row = result.rows[0];
   if (!row) throw new Error('Erro ao criar agendamento');
   return row;
@@ -119,12 +141,12 @@ export async function update(id: number, data: Record<string, unknown>, profissi
   return row;
 }
 
-export async function cancelar(id: number, profissionalId: number) {
+export async function cancelar(id: number, profesionalId: number) {
   const result = await pool.query(
     `UPDATE agendamento SET status = 'Cancelado'
      WHERE id_agendamento = $1 AND id_profissional = $2
      RETURNING id_agendamento`,
-    [id, profissionalId]
+    [id, profesionalId]
   );
   if ((result.rowCount ?? 0) === 0) throw new Error('Agendamento nao encontrado');
 }
@@ -171,7 +193,7 @@ export async function confirmar(id: number, profissionalId: number) {
   const hora = String(ag.horario).substring(0, 5);
   try {
     await inserirTramite(id, 'sistema', `Agendamento confirmado pela profissional para ${dataFmt} às ${hora}`);
-  } catch { /* não bloqueia se tramite falhar */ }
+  } catch { /* erro silencioso */ }
 }
 
 export async function limparSlotsExpirados() {
@@ -211,16 +233,16 @@ export async function removeDisponibilidade(id: number, profissionalId: number) 
 export async function getSlotsParaData(profissionalId: number, data: string) {
   const result = await pool.query(
     `SELECT
-       da.horario,
-       da.vagas,
-       COUNT(a.id_agendamento) FILTER (
-         WHERE a.status NOT IN ('Cancelado','Finalizado')
-       ) AS ocupacoes
+        da.horario,
+        da.vagas,
+        COUNT(a.id_agendamento) FILTER (
+          WHERE a.status NOT IN ('Cancelado','Finalizado')
+        ) AS ocupacoes
      FROM disponibilidade_agenda da
      LEFT JOIN agendamento a
        ON a.id_profissional = da.id_profissional
       AND a.data_consulta = da.data_disponivel
-      AND a.horario = da.horario
+      AND a.horario LIKE da.horario || '%'
      WHERE da.id_profissional = $1 AND da.data_disponivel = $2
      GROUP BY da.horario, da.vagas
      ORDER BY da.horario`,
@@ -238,18 +260,34 @@ export async function reagendar(
   dados: { id_paciente: number; data_consulta: string; horario: string; observacoes?: string; id_agendamento_original?: number },
   profissionalId: number
 ) {
-  const conflito = await pool.query(
-    `SELECT id_agendamento FROM agendamento
-     WHERE id_profissional = $1 AND data_consulta = $2 AND horario = $3 AND status NOT IN ('Cancelado','Finalizado')`,
-    [profissionalId, dados.data_consulta, dados.horario]
+  const horarioBase = dados.horario.substring(0, 5);
+
+  const slotInfo = await pool.query(
+    `SELECT vagas FROM disponibilidade_agenda 
+     WHERE id_profissional = $1 AND data_disponivel = $2 AND horario LIKE $3`,
+    [profissionalId, dados.data_consulta, `${horarioBase}%`]
   );
-  if ((conflito.rowCount ?? 0) > 0) throw new Error('Já existe um agendamento ativo neste horário');
+  const limiteVagas = slotInfo.rows[0] ? Number(slotInfo.rows[0].vagas) : 1;
+
+  const ocupacoes = await pool.query(
+    `SELECT COUNT(id_agendamento) as total FROM agendamento
+     WHERE id_profissional = $1 AND data_consulta = $2 AND horario LIKE $3 AND status NOT IN ('Cancelado','Finalizado')`,
+    [profissionalId, dados.data_consulta, `${horarioBase}%`]
+  );
+  const totalOcupado = Number(ocupacoes.rows[0]?.total || 0);
+
+  if (totalOcupado >= limiteVagas) {
+    throw new Error('Já existe um agendamento ativo neste horário');
+  }
+
+  const segundosDinamicos = String(totalOcupado).padStart(2, '0');
+  const horarioFinalComSegundos = `${horarioBase}:${segundosDinamicos}`;
 
   const result = await pool.query(
     `INSERT INTO agendamento (id_paciente, id_profissional, data_consulta, horario, status, observacoes, id_reagendado_de)
      VALUES ($1,$2,$3,$4,'Confirmado',$5,$6)
      RETURNING *`,
-    [dados.id_paciente, profissionalId, dados.data_consulta, dados.horario, dados.observacoes ?? null, dados.id_agendamento_original ?? null]
+    [dados.id_paciente, profissionalId, dados.data_consulta, horarioFinalComSegundos, dados.observacoes ?? null, dados.id_agendamento_original ?? null]
   );
   const row = result.rows[0] as { id_agendamento: number; data_consulta: string; horario: string } | undefined;
   if (!row) throw new Error('Erro ao criar reagendamento');
@@ -272,7 +310,7 @@ export async function reagendar(
         `Consulta reagendada — nova consulta criada: ${novoCode} para ${dataFmt} às ${hora}`
       );
     }
-  } catch { /* não bloqueia se tramite falhar */ }
+  } catch { /* falha silenciosa */ }
 
   return row;
 }
@@ -307,7 +345,7 @@ export async function finalizar(id: number, data: FinalizarData, profissionalId:
       await client.query(
         `INSERT INTO financeiro (id_consulta, valor, forma_pagamento, status_pagamento, data_pagamento)
          VALUES ($1,$2,$3,'Pago',NOW())`,
-        [consulta.id_consulta, data.valor, data.forma_pagamento ?? 'Dinheiro']
+         [consulta.id_consulta, data.valor, data.forma_pagamento ?? 'Dinheiro']
       );
     }
 

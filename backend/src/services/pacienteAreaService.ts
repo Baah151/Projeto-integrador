@@ -142,22 +142,39 @@ export async function createAgendamento(pacienteId: number, data: { data_consult
   const prof = profResult.rows[0] as { id_profissional: number } | undefined;
   if (!prof) throw new Error('Nenhum profissional encontrado');
 
-  const dataHora = new Date(`${data.data_consulta}T${data.horario}`);
+  const horarioLimpo = data.horario.substring(0, 5);
+  const dataHora = new Date(`${data.data_consulta}T${horarioLimpo}`);
   if (dataHora <= new Date()) throw new Error('Data e horario devem ser no futuro');
 
-  const conflito = await pool.query(
-    `SELECT id_agendamento FROM agendamento
-     WHERE id_profissional = $1 AND data_consulta = $2 AND horario = $3 AND status != 'Cancelado'`,
-    [prof.id_profissional, data.data_consulta, data.horario]
+  // 1. Busca o número máximo de vagas estipulado na agenda para esse horário
+  const slotInfo = await pool.query(
+    `SELECT vagas FROM disponibilidade_agenda 
+     WHERE id_profissional = $1 AND data_disponivel = $2 AND horario::text LIKE $3`,
+    [prof.id_profissional, data.data_consulta, `${horarioLimpo}%`]
   );
-  if ((conflito.rowCount ?? 0) > 0) throw new Error('Horario indisponivel. Escolha outro horario.');
+  const limiteVagas = slotInfo.rows[0] ? Number(slotInfo.rows[0].vagas) : 1;
 
+  // 2. Calcula a ocupação global real do horário (quantas linhas ativas existem ali)
+  const ocupacoes = await pool.query(
+    `SELECT COUNT(id_agendamento) as total FROM agendamento
+     WHERE id_profissional = $1 AND data_consulta = $2 AND horario::text LIKE $3 AND status != 'Cancelado'`,
+    [prof.id_profissional, data.data_consulta, `${horarioLimpo}%`]
+  );
+  const totalOcupado = Number(ocupacoes.rows[0]?.total || 0);
+
+  // 3. Se as vagas já acabaram, bloqueia
+  if (totalOcupado >= limiteVagas) {
+    throw new Error('Horario indisponivel. Escolha outro horario.');
+  }
+
+  // 4. Se o limite permite, cria uma NOVA LINHA exclusiva para você (com seu id_paciente!)
   const result = await pool.query(
     `INSERT INTO agendamento (id_paciente, id_profissional, data_consulta, horario, status, observacoes)
      VALUES ($1,$2,$3,$4,'Agendado',$5)
      RETURNING *`,
-    [pacienteId, prof.id_profissional, data.data_consulta, data.horario, data.observacoes ?? null]
+    [pacienteId, prof.id_profissional, data.data_consulta, `${horarioLimpo}:00`, data.observacoes ?? null]
   );
+  
   const row = result.rows[0] as { id_agendamento: number; data_consulta: string; horario: string } | undefined;
   if (!row) throw new Error('Erro ao criar agendamento');
 
@@ -166,7 +183,7 @@ export async function createAgendamento(pacienteId: number, data: { data_consult
   const hora = String(row.horario).substring(0, 5);
   try {
     await inserirTramite(row.id_agendamento, 'sistema', `Solicitação de agendamento realizada pelo paciente para ${dataFmt} às ${hora}`);
-  } catch { /* não bloqueia */ }
+  } catch { /* silencioso */ }
 
   return row;
 }

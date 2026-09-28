@@ -67,7 +67,7 @@
         <main class="main-content">
             <div class="topbar">
                 <h1>Agendar Consulta</h1>
-                <p>Selecione o serviço, a data e um dos horários disponíveis liberados pela profissional.</p>
+                <p>Selecione o tipo de atendimento, a data e um dos horários disponíveis liberados pela profissional.</p>
             </div>
             
             <div class="schedule-card">
@@ -75,17 +75,15 @@
                     
                     <div class="input-group">
                         <label for="servico">Tipo de Atendimento</label>
-                        <select id="servico" required onchange="carregarDatas()">
-                            <option value="" disabled selected>Selecione o serviço</option>
-                            <option value="fisioterapia">Fisioterapia</option>
-                            <option value="pilates">Pilates</option>
+                        <select id="servico" required>
+                            <option value="" disabled selected>Carregando atendimentos disponíveis...</option>
                         </select>
                     </div>
 
                     <div class="input-group">
                         <label for="date-select">Datas Disponíveis</label>
-                        <select id="date-select" required onchange="showTimes()" disabled>
-                            <option value="" disabled selected>Selecione primeiro o serviço</option>
+                        <select id="date-select" required disabled>
+                            <option value="" disabled selected>Selecione primeiro o tipo de atendimento</option>
                         </select>
                     </div>
 

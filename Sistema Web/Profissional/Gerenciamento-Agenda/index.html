@@ -119,12 +119,21 @@
                         <input type="date" id="data-disponivel">
                     </div>
 
+                    <!-- ITEM 2 ALTERADO: TIPO DE ATENDIMENTO (ESPECIALIDADE REMOVIDA) -->
                     <div class="input-group">
-                        <label>2. Especialidade</label>
-                        <select class="type-select" id="servico-select">
-                            <option value="Fisioterapia">Fisioterapia</option>
-                            <option value="Pilates">Pilates</option>
-                        </select>
+                        <label>2. Tipo de Atendimento</label>
+                        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                            <input type="text" id="novo-atendimento-input" placeholder="Digite um tipo de atendimento">
+                            <button type="button" id="btn-add-atendimento" style="padding: 0 12px; background: #046C4E; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">+</button>
+                        </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <select class="type-select" id="atendimento-select" style="flex: 1;">
+                                <!-- Alimentado via JS -->
+                            </select>
+                            <button type="button" id="btn-del-atendimento" style="padding: 0 12px; background: #DC2626; color: white; border: none; border-radius: 6px; cursor: pointer;" title="Excluir atendimento selecionado">
+                                <span class="material-symbols-outlined" style="font-size: 18px; vertical-align: middle;">delete</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="input-group">
