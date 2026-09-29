@@ -75,6 +75,29 @@
                     </div>
                 </div>
 
+                <section class="orientacao-card" id="orientacao-card">
+                    <div class="orientacao-topo">
+                        <h2 class="section-title" style="margin:0;">Orientação de Conduta</h2>
+                        <span class="orientacao-meta" id="orientacao-meta">Auxiliar de Casos</span>
+                    </div>
+                    <p class="orientacao-sub">O que deve ser realizado com este paciente, com base na sua avaliação, nos laudos enviados e no histórico.</p>
+
+                    <label class="orientacao-label" for="orientacao-anotacoes">Sua avaliação e anotações</label>
+                    <textarea id="orientacao-anotacoes" rows="4" maxlength="4000"
+                        placeholder="Ex.: Queixa: dor no joelho direito ao subir escadas há 2 meses. EVA 6/10. Flexão 110°. Objetivo: voltar a correr."></textarea>
+
+                    <div class="orientacao-laudos" id="orientacao-laudos"></div>
+
+                    <div class="orientacao-acoes">
+                        <button type="button" class="btn-gerar-orientacao" id="btn-gerar-orientacao">
+                            <span class="material-symbols-outlined">auto_awesome</span>
+                            <span id="btn-gerar-orientacao-txt">Gerar orientação</span>
+                        </button>
+                    </div>
+
+                    <div class="orientacao-resultado" id="orientacao-resultado" aria-live="polite"></div>
+                </section>
+
                 <div class="timeline-header-row">
                     <h2 class="section-title">Histórico de Atendimentos Concluídos</h2>
                     <div class="filter-group">
@@ -343,5 +366,6 @@
 
     <script src="../assets/api.js"></script>
     <script src="script.js"></script>
+    <script src="orientacao.js"></script>
 </body>
 </html>

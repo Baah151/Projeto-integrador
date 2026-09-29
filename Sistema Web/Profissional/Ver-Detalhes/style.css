@@ -725,3 +725,40 @@ body {
     font-weight: 700;
     cursor: pointer;
 }
+/* ─── Orientação de Conduta (Auxiliar de Casos) ─────────────── */
+.orientacao-card { background: #fff; border-radius: 18px; padding: 22px 24px; margin: 20px 0 32px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); border-left: 4px solid #6366F1; }
+.orientacao-topo { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.orientacao-meta { font-size: 0.72rem; font-weight: 600; color: #4F46E5; background: #EEF2FF; padding: 4px 10px; border-radius: 999px; }
+.orientacao-sub { font-size: 0.8rem; color: #6B7280; margin: 6px 0 14px; }
+.orientacao-label { display: block; font-size: 0.8rem; font-weight: 600; color: #047857; margin-bottom: 6px; }
+#orientacao-anotacoes { width: 100%; border: 1px solid #D1D5DB; border-radius: 12px; padding: 10px 12px; font-family: inherit; font-size: 0.86rem; color: #1F2937; resize: vertical; }
+#orientacao-anotacoes:focus { outline: none; border-color: #10B981; box-shadow: 0 0 0 3px rgba(16,185,129,.15); }
+.orientacao-laudos { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
+.orient-laudo { font-size: 0.74rem; padding: 4px 10px; border-radius: 999px; background: #F3F4F6; color: #4B5563; cursor: default; }
+.orient-laudo.lido { background: #D1FAE5; color: #065F46; }
+.orient-laudo.erro { background: #FEF3C7; color: #92400E; }
+.orient-laudo.vazio { background: transparent; padding-left: 0; color: #9CA3AF; }
+.orientacao-acoes { display: flex; justify-content: flex-end; }
+.btn-gerar-orientacao { display: inline-flex; align-items: center; gap: 6px; background: #4F46E5; color: #fff; border: none; padding: 9px 18px; border-radius: 10px; font-size: 0.84rem; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-gerar-orientacao:hover { background: #4338CA; }
+.btn-gerar-orientacao:disabled { opacity: .7; cursor: wait; }
+.btn-gerar-orientacao .material-symbols-outlined { font-size: 18px; }
+.orientacao-resultado { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; transition: opacity .2s; }
+.orientacao-resultado.carregando { opacity: .45; }
+.orient-vazio, .orient-aviso { font-size: 0.82rem; color: #6B7280; }
+.orient-alerta { border-radius: 10px; padding: 10px 14px; font-size: 0.83rem; background: #FFFBEB; border-left: 4px solid #D97706; color: #78350F; }
+.orient-alerta.sev-critica { background: #FEF2F2; border-left-color: #DC2626; color: #7F1D1D; }
+.orient-ia { background: #EEF2FF; border-radius: 12px; padding: 14px 16px; font-size: 0.86rem; color: #1E1B4B; line-height: 1.55; }
+.orient-ia p + p, .orient-ia p + ul, .orient-ia ul + p { margin-top: 8px; }
+.orient-selo { display: block; font-size: 0.72rem; font-weight: 700; color: #4F46E5; margin-bottom: 6px; }
+.orient-lista { margin: 6px 0 0 20px; font-size: 0.84rem; }
+.orient-lista li { margin-bottom: 4px; }
+.orient-bloco { background: #F9FAFB; border-radius: 12px; padding: 10px 14px; font-size: 0.84rem; }
+.orient-bloco summary { cursor: pointer; font-weight: 600; color: #065F46; }
+.orient-proc-linha { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
+.orient-proc-rotulo { font-size: 0.78rem; font-weight: 600; color: #374151; }
+.orient-proc { font-size: 0.74rem; padding: 3px 10px; border-radius: 999px; background: #D1FAE5; color: #065F46; cursor: help; }
+.orient-proc.st-cautela { background: #FEF3C7; color: #92400E; }
+.orient-proc.st-contraindicado { background: #FEE2E2; color: #991B1B; }
+.orient-condicoes { font-size: 0.76rem; color: #6B7280; }
+@media (max-width: 600px) { .orientacao-card { padding: 18px 16px; } .orientacao-acoes { justify-content: stretch; } .btn-gerar-orientacao { width: 100%; justify-content: center; } }

@@ -61,6 +61,89 @@ export async function runMigrations(): Promise<void> {
     `ALTER TABLE paciente ADD COLUMN IF NOT EXISTS observacoes TEXT`,
     // foto de perfil do paciente (base64)
     `ALTER TABLE paciente ADD COLUMN IF NOT EXISTS foto_base64 TEXT`,
+    // copiloto clínico: catálogo de procedimentos (dataset em backend/dados/procedimentos_fisioterapia.json)
+    `CREATE TABLE IF NOT EXISTS copiloto_procedimento (
+      id VARCHAR(10) PRIMARY KEY,
+      codigo_rbpf VARCHAR(30),
+      area VARCHAR(80) NOT NULL,
+      nome VARCHAR(200) NOT NULL,
+      descricao TEXT,
+      indicacoes JSONB NOT NULL DEFAULT '[]',
+      contraindicacoes_absolutas JSONB NOT NULL DEFAULT '[]',
+      contraindicacoes_relativas JSONB NOT NULL DEFAULT '[]',
+      pre_requisitos JSONB NOT NULL DEFAULT '[]',
+      escalas_sugeridas JSONB NOT NULL DEFAULT '[]',
+      regras_validacao JSONB NOT NULL DEFAULT '[]',
+      fontes JSONB NOT NULL DEFAULT '[]',
+      versao_dataset VARCHAR(20) NOT NULL,
+      atualizado_em TIMESTAMP DEFAULT NOW()
+    )`,
+    // copiloto clínico: condições clínicas (dataset em backend/dados/condicoes_clinicas_fisioterapia.csv)
+    `CREATE TABLE IF NOT EXISTS copiloto_condicao (
+      id VARCHAR(10) PRIMARY KEY,
+      nome VARCHAR(200) NOT NULL,
+      cid10 VARCHAR(80),
+      area VARCHAR(80),
+      prevalencia_idosos VARCHAR(80),
+      sinais_alerta JSONB NOT NULL DEFAULT '[]',
+      avaliacao JSONB NOT NULL DEFAULT '[]',
+      procedimentos_recomendados JSONB NOT NULL DEFAULT '[]',
+      precaucoes JSONB NOT NULL DEFAULT '[]',
+      metas JSONB NOT NULL DEFAULT '[]',
+      criterios_encaminhamento JSONB NOT NULL DEFAULT '[]',
+      fontes JSONB NOT NULL DEFAULT '[]',
+      atualizado_em TIMESTAMP DEFAULT NOW()
+    )`,
+    // histórico de conversas com o copiloto (uma conversa = um atendimento)
+    `CREATE TABLE IF NOT EXISTS copiloto_conversa (
+      id_conversa SERIAL PRIMARY KEY,
+      id_profissional INT NOT NULL REFERENCES profissional(id_profissional) ON DELETE CASCADE,
+      titulo VARCHAR(160) NOT NULL DEFAULT 'Nova consulta',
+      contexto JSONB NOT NULL DEFAULT '{}',
+      status_triagem VARCHAR(20),
+      quadros TEXT,
+      criado_em TIMESTAMP DEFAULT NOW(),
+      atualizado_em TIMESTAMP DEFAULT NOW()
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_copiloto_conversa_prof ON copiloto_conversa(id_profissional, atualizado_em DESC)`,
+    `CREATE TABLE IF NOT EXISTS copiloto_mensagem (
+      id_mensagem SERIAL PRIMARY KEY,
+      id_conversa INT NOT NULL REFERENCES copiloto_conversa(id_conversa) ON DELETE CASCADE,
+      texto TEXT NOT NULL,
+      analise JSONB NOT NULL,
+      criado_em TIMESTAMP DEFAULT NOW()
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_copiloto_mensagem_conversa ON copiloto_mensagem(id_conversa, id_mensagem)`,
+    // conversa vinculada a um paciente cadastrado; mensagem do tipo 'ficha' = orientação inicial da ficha
+    `ALTER TABLE copiloto_conversa ADD COLUMN IF NOT EXISTS id_paciente INT REFERENCES paciente(id_paciente) ON DELETE SET NULL`,
+    `ALTER TABLE copiloto_mensagem ADD COLUMN IF NOT EXISTS tipo VARCHAR(20) NOT NULL DEFAULT 'relato'`,
+    // achados clínicos extraídos de cada laudo (cache: o laudo só é lido pela IA uma vez)
+    `CREATE TABLE IF NOT EXISTS copiloto_laudo_extracao (
+      id_documento INT PRIMARY KEY REFERENCES documento(id_documento) ON DELETE CASCADE,
+      resumo TEXT,
+      erro TEXT,
+      modelo VARCHAR(60),
+      extraido_em TIMESTAMP DEFAULT NOW()
+    )`,
+    // orientação de conduta por paciente (anotações da profissional + laudos + histórico)
+    `CREATE TABLE IF NOT EXISTS copiloto_plano_paciente (
+      id_paciente INT PRIMARY KEY REFERENCES paciente(id_paciente) ON DELETE CASCADE,
+      anotacoes_profissional TEXT,
+      analise JSONB,
+      ia JSONB,
+      laudos_considerados INT DEFAULT 0,
+      id_profissional INT REFERENCES profissional(id_profissional) ON DELETE SET NULL,
+      gerado_em TIMESTAMP,
+      atualizado_em TIMESTAMP DEFAULT NOW()
+    )`,
+    `CREATE TABLE IF NOT EXISTS copiloto_regra_geral (
+      id VARCHAR(10) PRIMARY KEY,
+      tipo VARCHAR(20) NOT NULL,
+      regra TEXT NOT NULL,
+      fonte TEXT,
+      versao_dataset VARCHAR(20) NOT NULL,
+      atualizado_em TIMESTAMP DEFAULT NOW()
+    )`,
   ];
 
   // Executa migrations em série com um único cliente para não abrir múltiplas conexões

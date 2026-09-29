@@ -156,6 +156,57 @@
                     </div>
                 </section>
 
+                <section class="ai-side chat" id="copiloto">
+                    <div class="ai-header">
+                        <h2><span class="material-symbols-outlined">neurology</span> Copiloto Clínico</h2>
+                        <div class="chat-header-acoes">
+                            <span class="ai-status" id="cop-status" data-status="VAZIO">Nova consulta</span>
+                            <button type="button" class="chat-novo" id="cop-historico-btn" title="Histórico de atendimentos">
+                                <span class="material-symbols-outlined">history</span>
+                            </button>
+                            <button type="button" class="chat-novo" id="cop-novo" title="Começar nova consulta">
+                                <span class="material-symbols-outlined">add_comment</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <label class="chat-paciente">
+                        <span class="material-symbols-outlined">person</span>
+                        <select id="cop-paciente" aria-label="Paciente do atendimento">
+                            <option value="">Sem paciente (caso livre)</option>
+                        </select>
+                    </label>
+
+                    <div class="chat-aviso-ia" id="cop-aviso-ia" hidden>
+                        <span class="material-symbols-outlined">support_agent</span>
+                        <span><strong>Auxiliar de casos.</strong> Parte das respostas é gerada por IA (Google Gemini).</span>
+                    </div>
+
+                    <div class="chat-corpo">
+                        <div class="chat-mensagens" id="cop-mensagens" aria-live="polite"></div>
+
+                        <div class="chat-historico" id="cop-historico" hidden>
+                            <div class="chat-historico-topo">
+                                <strong>Histórico de atendimentos</strong>
+                                <button type="button" class="chat-historico-fechar" id="cop-historico-fechar" title="Fechar">
+                                    <span class="material-symbols-outlined">close</span>
+                                </button>
+                            </div>
+                            <input type="search" id="cop-historico-busca" class="chat-historico-busca" placeholder="Buscar por queixa ou quadro…">
+                            <div class="chat-historico-lista" id="cop-historico-lista"></div>
+                        </div>
+                    </div>
+
+                    <form class="chat-entrada" id="cop-form" autocomplete="off">
+                        <textarea id="cop-input" rows="1" placeholder="Escreva o que o paciente relatou…"></textarea>
+                        <button type="submit" class="chat-enviar" title="Enviar">
+                            <span class="material-symbols-outlined">send</span>
+                        </button>
+                    </form>
+
+                    <p class="ai-aviso">Ferramenta de apoio. Não substitui o julgamento clínico do fisioterapeuta.</p>
+                </section>
+
             </div>
         </main>
     </div>
@@ -164,5 +215,6 @@
 
     <script src="../assets/api.js"></script>
     <script src="script.js"></script>
+    <script src="copiloto.js"></script>
 </body>
 </html>

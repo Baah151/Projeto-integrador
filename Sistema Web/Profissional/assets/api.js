@@ -339,6 +339,57 @@ async function listarConsultas(params = {}) {
   return (await apiRequest('GET', `/historico/consultas${q ? '?' + q : ''}`)) || [];
 }
 
+// ─── COPILOTO CLÍNICO ──────────────────────────────────────────────
+
+async function triagemRedFlags(anamnese) {
+  return await apiRequest('POST', '/copiloto/anamnese/triagem', anamnese);
+}
+
+async function analisarConsultaCopiloto(anamnese) {
+  return await apiRequest('POST', '/copiloto/analise', anamnese);
+}
+
+// Histórico: sem conversaId cria uma conversa nova; retorna { conversaId, analise }.
+async function enviarMensagemCopiloto(conversaId, texto, contexto) {
+  const url = conversaId ? `/copiloto/conversas/${conversaId}/mensagens` : '/copiloto/conversas/mensagens';
+  return await apiRequest('POST', url, { texto, contexto });
+}
+
+// Abre atendimento para paciente cadastrado: { conversaId, mensagemId, analise, paciente, iaPendente }.
+async function iniciarAtendimentoCopiloto(idPaciente) {
+  return await apiRequest('POST', `/copiloto/pacientes/${idPaciente}/atendimento`);
+}
+
+// Etapa 2 da resposta: IA generativa para uma mensagem já analisada.
+async function gerarIACopiloto(conversaId, mensagemId) {
+  return await apiRequest('POST', `/copiloto/conversas/${conversaId}/mensagens/${mensagemId}/ia`);
+}
+
+// Orientação de conduta do paciente: { plano, laudos, iaHabilitada }.
+async function obterOrientacaoPaciente(idPaciente) {
+  return await apiRequest('GET', `/copiloto/pacientes/${idPaciente}/plano`);
+}
+
+async function gerarOrientacaoPaciente(idPaciente, anotacoes) {
+  return await apiRequest('POST', `/copiloto/pacientes/${idPaciente}/plano`, { anotacoes });
+}
+
+async function obterStatusCopiloto() {
+  return await apiRequest('GET', '/copiloto/status');
+}
+
+async function listarConversasCopiloto() {
+  return (await apiRequest('GET', '/copiloto/conversas')) || [];
+}
+
+async function obterConversaCopiloto(id) {
+  return await apiRequest('GET', `/copiloto/conversas/${id}`);
+}
+
+async function excluirConversaCopiloto(id) {
+  return await apiRequest('DELETE', `/copiloto/conversas/${id}`);
+}
+
 // ─── NOTIFICAÇÕES GLOBAIS (auto-executa em todas as páginas) ──────
 
 const _NOTIF_CACHE_TTL = 90 * 1000; // 90 segundos entre re-buscas

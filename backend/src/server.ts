@@ -18,8 +18,10 @@ import documentosRoutes from './routes/documentos.js';
 import consultasRoutes from './routes/consultas.js';
 import sessaoRoutes from './routes/sessao.js';
 import tramitesRoutes from './routes/tramites.js';
+import copilotoRoutes from './routes/copiloto.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { runMigrations } from './config/migrations.js';
+import { sincronizarDataset } from './copiloto/procedimentos/procedimentosRepo.js';
 import { limparSlotsExpirados } from './services/agendamentosService.js';
 
 const app = express();
@@ -60,6 +62,7 @@ app.use('/api/documentos', documentosRoutes);
 app.use('/api/consultas', consultasRoutes);
 app.use('/api/sessao', sessaoRoutes);
 app.use('/api/tramites', tramitesRoutes);
+app.use('/api/copiloto', copilotoRoutes);
 
 app.use((_req, res) => {
   res.status(404).json({ success: false, message: 'Rota nao encontrada', error: 'NOT_FOUND', timestamp: new Date().toISOString() });
@@ -72,6 +75,8 @@ app.listen(PORT, async () => {
   console.log(`Servidor rodando na porta ${PORT}`);
   console.log(`Health check: http://localhost:${PORT}/api/health`);
   await runMigrations();
+  await sincronizarDataset().catch((err) =>
+    console.error('[Copiloto] Falha ao sincronizar dataset de procedimentos:', err instanceof Error ? err.message : err));
   await limparSlotsExpirados();
   console.log('Slots expirados removidos da agenda.');
 
